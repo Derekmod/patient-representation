@@ -5,13 +5,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b26c9f2f-f6d3-4586-acdc-23779776d367</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PatientRepresentation.py</StartupFile>
+    <StartupFile>evaluate_reconstruction.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>PatientRepresentation</Name>
     <RootNamespace>PatientRepresentation</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +23,22 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="dataset.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="evaluate_reconstruction.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="gtex_reader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PatientRepresentation.py" />
+    <Compile Include="trainer.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

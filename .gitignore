@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+ugrad_dump/
 
 # C extensions
 *.so

@@ -1,0 +1,1 @@
+"""Represents GTEx tissue data."""
