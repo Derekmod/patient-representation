@@ -9,7 +9,8 @@ Attributes:
 """
 
 import numpy as np
-# from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA
+import os
 
 from patient import Patient
 
@@ -53,10 +54,10 @@ class Tissue(object):
         return len(self._patients)
 
 
-def loadFromFile(filename, dataset, verbose=False, run_pca=True, pca_var=0.9):
+def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4):
     # TODO: arg check
 
-    tissue_name = filename.split('.')[0]
+    tissue_name = os.path.basename(filename).split('.')[0]
     tissue = Tissue(tissue_name, dataset)
 
     tissue_file = open(filename, 'r')
@@ -83,20 +84,29 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, pca_var=0.9):
     val = np.array(raw_t).T
 
     if run_pca:
-        #pca_model = PCA(n_components=50, copy=False)
-        #pca_model.fit_transform(val)
-        cov = val.T.dot(val)/(len(raw_t))
+        pca_model = PCA(n_components=50, copy=False)
+        pca_model.fit_transform(val)
+        #cov = val.T.dot(val)/(len(raw_t))
 
-        U, W, _ = np.linalg.svd(cov)
+        #U, W, _ = np.linalg.svd(cov)
 
-        cum_var = np.cumsum(W**2)
-        cum_var = cum_var/cum_var[-1]
-        n_components = (cum_var<0.9).sum() + 1
+        #cum_var = np.cumsum(W**2)
+        #cum_var = cum_var/cum_var[-1]
+        cum_var = np.cumsum(pca_model.explained_variance_ratio_)
+        explained_ratio = [float(cum_var[i])/float(i+1)
+                           for i in range(len(cum_var))]
+        
+        best_dim = 0
+        for dim in range(len(cum_var)):
+            if explained_ratio[dim]*len(patient_ids) > explain_rat:
+                best_dim = dim
+        n_components = best_dim+1
 
-        val = val.dot(U[:,:n_components])
-
+        #val = val.dot(U[:,:n_components])
+        val = val[:,:n_components]
+        
         if verbose:
-            print tissue_name + ' has {} components'.format(n_components)
+            print tissue_name + ' has {} components to explain {}% variance'.format(n_components, cum_var[best_dim])
 
         val = val[:n_components,:]
     elif verbose:

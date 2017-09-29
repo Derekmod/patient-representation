@@ -37,7 +37,7 @@ def loadFromDir(directory_name, verbose=False):
         if verbose:
             print 'reading from ' + filename
         tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose)
-        data.tissues[tissue.name] = tissue
+        dataset.tissues[tissue.name] = tissue
 
-    return data
+    return dataset
     
