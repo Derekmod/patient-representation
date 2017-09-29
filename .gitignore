@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 ugrad_dump/
+data/
 
 # C extensions
 *.so
