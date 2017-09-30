@@ -50,7 +50,7 @@ class PatientModel(object):
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
             rep_list = [None]*tissue.numPatients
             for patient_id in tissue.patients:
-                rep_list[tissue.rows[patient_it]] = self.patient_reps[patient_id]
+                rep_list[tissue.rows[patient_id]] = self.patient_reps[patient_id]
             patient_reps = np.concatenate(rep_list)
 
             # transform = least squares solver
