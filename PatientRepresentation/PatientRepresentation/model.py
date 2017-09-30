@@ -46,9 +46,10 @@ class PatientModel(object):
 
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
             patient_reps = np.concatenate([self.patient_reps[patient_id] 
-                                           for patient_id in self.patient_reps])
+                                           for patient_id in tissue.patients])
 
             # transform = least squares solver
+            print tissue.value.shape
             print residuals.shape
             print patient_reps.shape
             pinv = np.linalg.pinv(patient_reps)
