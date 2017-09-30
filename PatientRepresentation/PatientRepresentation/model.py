@@ -77,6 +77,9 @@ class PatientModel(object):
             tissue = dataset.tissues[tissue_name]
             transform = self.tissue_transforms[tissue_name]
 
+            print tissue.value.shape
+            sum = np.sum(tissue.value)
+            print sum.shape
             sum_residual = -np.sum(tissue.value).reshape(1, tissue.dimension)
 
             for patient_id in tissue.patients:
