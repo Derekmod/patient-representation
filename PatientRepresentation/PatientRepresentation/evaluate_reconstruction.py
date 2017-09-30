@@ -9,7 +9,7 @@ if __name__ == '__main__':
     base_dir = os.path.dirname(base_dir)
 
     data_dir = os.path.join(base_dir, 'data')
-    data_dir = os.path.join(data_dir, 'V7 Data')
+    data_dir = os.path.join(base_dir, 'V7 Data')
 
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
     print dataset
