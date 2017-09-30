@@ -24,3 +24,17 @@ if __name__ == '__main__':
 
     print tissue.value[tissue.rows[patient_id],:]
     print model.predict(patient_id, tissue_name)
+
+    total_var = 0.
+    remaining_var = 0.
+    for tissue_name in dataset.tissues:
+        tissue = dataset.tissues[tissue_name]
+        for patient_id in tissue.patients:
+            rep = dataset.getValue(patient_id, tissue_name)
+            residual = model.predict(patient_id, tissue_name) - rep
+
+            total_var += rep.T.dot(rep)[0,0]
+            remaining_var = residual.T.dot(residual)[0,0]
+
+    print 'total_var = {}'.format(total_var)
+    print 'remaining_var = {}'.format(total_var)

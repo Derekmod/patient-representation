@@ -23,6 +23,11 @@ class PatientTissueData(object):
             print 'BUG: Rewriting patient'
         self._patients[patient.id] = patient
 
+    def getValue(self, patient_id, tissue_name):
+        tissue = self.tissues[tissue_name]
+        row = tissue.rows[patient_id]
+        return tissue.value[row:row+1, :]
+
     @property
     def patients(self):
         return self._patients
