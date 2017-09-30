@@ -67,7 +67,7 @@ class PatientModel(object):
                 transforms.append(self.tissue_transforms[tissue_name])
 
             total_residual = np.concatenate(residuals, axis=1)
-            total_transform = np.contatenate(transforms, axis=1)
+            total_transform = np.concatenate(transforms, axis=1)
 
             pinv = np.linalg.pinv(total_transform)
             self.patient_reps[patient_id] = total_residual.dot(pinv)
