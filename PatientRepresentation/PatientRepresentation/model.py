@@ -26,11 +26,11 @@ class PatientModel(object):
         #self._dataset = dataset
 
         for patient_id in dataset.patients:
-            self._patient_reps[patient_id] = np.random.randn(1, self.dimensions)
+            self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
             
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
-            self._tissue_centers[tissue_name] = np.zeros((1,tissue.dimension))
+            self._tissue_centers[tissue_name] = np.zeros((1, tissue.dimension))
 
         for ep in range(self._max_iter):
             self.train_transforms(dataset)
