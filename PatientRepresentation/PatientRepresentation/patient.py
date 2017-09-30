@@ -34,5 +34,6 @@ class Patient(object):
     def id(self):
         return self._id
 
+    @property
     def tissues(self):
         return self._tissues

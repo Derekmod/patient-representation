@@ -12,7 +12,6 @@ if __name__ == '__main__':
     data_dir = os.path.join(data_dir, 'V7 Data')
 
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
-    print dataset
 
     model = PatientModel()
     model.fit(dataset)

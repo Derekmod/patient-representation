@@ -49,9 +49,6 @@ class PatientModel(object):
                                            for patient_id in tissue.patients])
 
             # transform = least squares solver
-            print tissue.value.shape
-            print residuals.shape
-            print patient_reps.shape
             pinv = np.linalg.pinv(patient_reps)
             self.tissue_transforms[tissue_name] = pinv.dot(residuals)
 
