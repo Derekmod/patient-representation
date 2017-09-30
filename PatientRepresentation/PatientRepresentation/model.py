@@ -49,7 +49,8 @@ class PatientModel(object):
                                            for patient_id in self.patient_reps])
 
             # transform = least squares solver
-            self.tissue_transforms[tissue_name] = np.linalg.pinv(patient_reps).dot(residuals)
+            pinv = np.linalg.pinv(patient_reps)
+            self.tissue_transforms[tissue_name] = pinv.dot(residuals)
 
     def train_patients(self, dataset):
         for patient_id in dataset.patients:
@@ -68,7 +69,8 @@ class PatientModel(object):
             total_residual = np.concatenate(residuals, axis=1)
             total_transform = np.contatenate(transforms, axis=1)
 
-            self.patient_reps[patient_id] = total_residual.dot(np.linalg.pinv(total_transform))
+            pinv = np.linalg.pinv(total_transform)
+            self.patient_reps[patient_id] = total_residual.dot(pinv)
 
     def train_centers(self, dataset):
         for tissue_name in dataset.tissues:

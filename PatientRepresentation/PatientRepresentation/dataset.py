@@ -39,7 +39,7 @@ def loadFromDir(directory_name, verbose=False):
     for filename in filenames[:2]:
         if verbose:
             print 'reading from ' + filename
-        tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose, explain_rat=2.5)
+        tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose, explain_rat=10.)
         dataset.tissues[tissue.name] = tissue
 
     return dataset
