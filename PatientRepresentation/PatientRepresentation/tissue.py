@@ -112,9 +112,8 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
         val = val[:,:n_components]
         
         if verbose:
-            print tissue_name + ' has {} components to explain {}% variance'.format(n_components, cum_var[best_dim])
+            print tissue_name + ' has {} components to explain {}% variance'.format(n_components, cum_var[n_components-1])
 
-        val = val[:n_components,:]
     elif verbose:
         print tissue_name + ' parsed'
 
