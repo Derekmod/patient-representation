@@ -37,6 +37,7 @@ class PatientModel(object):
             self.train_patients(dataset)
             self.train_centers(dataset)
             # self.normalize()
+            print self.errorFrac(dataset)
 
     def train_transforms(self, dataset):
         for tissue_name in dataset.tissues:
@@ -90,6 +91,20 @@ class PatientModel(object):
 
     def predict(self, patient_id, tissue_name):
         return self.patient_reps[patient_id].dot(self.tissue_transforms[tissue_name]) + self.tissue_centers[tissue_name]
+
+    def errorFrac(self, dataset):
+        total_var = 0.
+        remaining_var = 0.
+        for tissue_name in dataset.tissues:
+            tissue = dataset.tissues[tissue_name]
+            for patient_id in tissue.patients:
+                rep = dataset.getValue(patient_id, tissue_name)
+                residual = model.predict(patient_id, tissue_name) - rep
+
+                total_var += rep.T.dot(rep)[0,0]
+                remaining_var += residual.T.dot(residual)[0,0]
+
+        return remaining_var/total_var
 
 
     @property
