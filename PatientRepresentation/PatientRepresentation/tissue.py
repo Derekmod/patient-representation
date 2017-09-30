@@ -5,7 +5,8 @@ Attributes:
     patients: [Patient] which patient is represented by given row
     rows: {string --> int} maps patient_id to row of its representation
     name: <string> name of tissue
-    dataset: <Dataset> dataset that owns this Tissue
+    dimension: <int>
+    #dataset: <Dataset> dataset that owns this Tissue
 """
 
 import numpy as np
@@ -16,11 +17,11 @@ from patient import Patient
 
 class Tissue(object):
 
-    def __init__(self, name, dataset):
+    def __init__(self, name, dataset=None):
         self._name = name
-        self._dataset = dataset
+        #self._dataset = dataset
 
-        self._patients = []
+        self._patients = dict()
         self._rows = dict()
         self._value = None
 
@@ -28,9 +29,9 @@ class Tissue(object):
     def name(self):
         return self._name
 
-    @property
-    def dataset(self):
-        return self._dataset
+    #@property
+    #def dataset(self):
+    #    return self._dataset
 
     @property
     def patients(self):
@@ -48,6 +49,10 @@ class Tissue(object):
     def value(self, new_value):
         # TODO: arg check
         self._value = new_value
+
+    @property
+    def dimension(self):
+        return self._value.shape()[1]
 
     @property
     def numPatients(self):
@@ -71,7 +76,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4):
         patient.addTissue(tissue)
         
         tissue._rows[patient_id] = tissue.numPatients
-        tissue._patients.append(patient)
+        tissue._patients[patient_id] = patient
 
     print 'got patients'
 

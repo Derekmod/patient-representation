@@ -3,7 +3,7 @@
 Attributes:
     id: <string> id specifying patient in GTEx
 Private Attributes:
-    _samples: <string --> (np.array, column)> the np.array is shared for all patients
+    _samples: <string --> Tissue>
     _covariates: <string --> number>
 """
 
@@ -11,11 +11,11 @@ class Patient(object):
 
     def __init__(self, id):
         self._id = id
-        self._samples = dict()
+        self._tissues = dict()
         self._covariates = dict()
 
     def addTissue(self, tissue):
-        self._samples[tissue.name] = tissue
+        self._tissues[tissue.name] = tissue
 
     def getTissueVal(self, tissue_name):
         """Gets 2d col vector rep. of patient's tissue sample."""
@@ -33,3 +33,6 @@ class Patient(object):
     @property
     def id(self):
         return self._id
+
+    def tissues(self):
+        return self._tissues

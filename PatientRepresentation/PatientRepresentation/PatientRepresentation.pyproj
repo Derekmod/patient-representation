@@ -29,9 +29,6 @@
     <Compile Include="evaluate_reconstruction.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="gtex_reader.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="model.py">
       <SubType>Code</SubType>
     </Compile>

@@ -18,6 +18,9 @@ class PatientTissueData(object):
 
 
     def addPatient(self, patient):
+        if patient_id in self._patients:
+            # TODO: error?
+            print 'BUG: Rewriting patient'
         self._patients[patient.id] = patient
 
     @property
