@@ -41,7 +41,7 @@ def loadFromDir(directory_name, verbose=False):
 
     filenames = os.listdir(directory_name)
 
-    for filename in filenames[:2]:
+    for filename in filenames:
         if verbose:
             print 'reading from ' + filename
         tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose, explain_rat=10.)
