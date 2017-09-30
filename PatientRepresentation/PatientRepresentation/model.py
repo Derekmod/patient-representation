@@ -53,7 +53,7 @@ class PatientModel(object):
 
             # transform = least squares solver
             pinv = np.linalg.pinv(patient_reps)
-            pinv = np.linalg.inv(patient_reps.T.dot).dot(patient_reps.T)
+            pinv = np.linalg.inv(patient_reps.T.dot(patient_reps)).dot(patient_reps.T)
             self.tissue_transforms[tissue_name] = pinv.dot(residuals)
 
     def train_patients(self, dataset):
