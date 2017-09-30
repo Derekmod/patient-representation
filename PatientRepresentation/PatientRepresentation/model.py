@@ -13,7 +13,7 @@ import numpy as np
 
 class PatientModel(object):
 
-    def __init__(self, dimension=5, max_iter=100):
+    def __init__(self, dimension=8, max_iter=100):
         self._patient_reps = dict()
         self._tissue_centers = dict()
         self._tissue_transforms = dict()
