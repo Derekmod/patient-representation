@@ -102,7 +102,7 @@ class PatientModel(object):
             tissue = dataset.tissues[tissue_name]
             for patient_id in tissue.patients:
                 rep = dataset.getValue(patient_id, tissue_name)
-                residual = model.predict(patient_id, tissue_name) - rep
+                residual = self.predict(patient_id, tissue_name) - rep
 
                 total_var += rep.T.dot(rep)[0,0]
                 remaining_var += residual.T.dot(residual)[0,0]
