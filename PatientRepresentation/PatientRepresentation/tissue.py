@@ -71,8 +71,8 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4):
     for patient_id in patient_ids:
         if patient_id not in tissue.dataset.patients:
             patient = Patient(patient_id)
-            tissue.dataset.addPatient(patient)
-        patient = tissue.dataset.patients[patient_id]
+            dataset.addPatient(patient)
+        patient = dataset.patients[patient_id]
         patient.addTissue(tissue)
         
         tissue._rows[patient_id] = tissue.numPatients
