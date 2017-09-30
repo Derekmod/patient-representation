@@ -120,5 +120,10 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
 
     tissue._value = val
 
+    print 'SUMMARY OF ' + tissue.name
+    print '\tshape: {}'.format(tissue.value.shape)
+    print '\t#patients: {}'.format(tissue.numPatients)
+    print '\n'
+
     return tissue
 
