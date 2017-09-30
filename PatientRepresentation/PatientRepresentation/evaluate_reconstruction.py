@@ -34,7 +34,7 @@ if __name__ == '__main__':
             residual = model.predict(patient_id, tissue_name) - rep
 
             total_var += rep.T.dot(rep)[0,0]
-            remaining_var = residual.T.dot(residual)[0,0]
+            remaining_var += residual.T.dot(residual)[0,0]
 
     print 'total_var = {}'.format(total_var)
-    print 'remaining_var = {}'.format(total_var)
+    print 'remaining_var = {}'.format(remaining_var)
