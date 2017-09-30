@@ -52,14 +52,14 @@ class Tissue(object):
 
     @property
     def dimension(self):
-        return self._value.shape()[1]
+        return self._value.shape[1]
 
     @property
     def numPatients(self):
         return len(self._patients)
 
 
-def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4):
+def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.):
     # TODO: arg check
 
     tissue_name = os.path.basename(filename).split('.')[0]
