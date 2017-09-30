@@ -69,7 +69,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4):
 
     patient_ids = tissue_file.readline().strip().split('\t')[4:]
     for patient_id in patient_ids:
-        if patient_id not in tissue.dataset.patients:
+        if patient_id not in dataset.patients:
             patient = Patient(patient_id)
             dataset.addPatient(patient)
         patient = dataset.patients[patient_id]
