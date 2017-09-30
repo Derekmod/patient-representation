@@ -10,7 +10,6 @@ if __name__ == '__main__':
 
     data_dir = os.path.join(base_dir, 'data')
     data_dir = os.path.join(data_dir, 'V7 Data')
-    #wtf
 
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
     print dataset
