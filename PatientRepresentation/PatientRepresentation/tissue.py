@@ -106,6 +106,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
             if explained_ratio[dim]*len(patient_ids) > explain_rat:
                 best_dim = dim
         n_components = best_dim+1
+        n_components = max(n_components, 8)
 
         #val = val.dot(U[:,:n_components])
         val = val[:,:n_components]
