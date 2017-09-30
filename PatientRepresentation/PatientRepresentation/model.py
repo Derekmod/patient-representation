@@ -31,13 +31,16 @@ class PatientModel(object):
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
             self._tissue_centers[tissue_name] = np.zeros((1, tissue.dimension))
-
+            
+        print self.errorFrac(dataset)
         for ep in range(self._max_iter):
             self.train_transforms(dataset)
-            self.train_patients(dataset)
-            self.train_centers(dataset)
-            # self.normalize()
             print self.errorFrac(dataset)
+            self.train_patients(dataset)
+            print self.errorFrac(dataset)
+            self.train_centers(dataset)
+            print self.errorFrac(dataset)
+            # self.normalize()
 
     def train_transforms(self, dataset):
         for tissue_name in dataset.tissues:
