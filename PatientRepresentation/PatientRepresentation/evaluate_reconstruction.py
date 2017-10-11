@@ -2,6 +2,7 @@ import os
 
 import dataset as dataset_m
 from model import PatientModel
+import patlearn_tools
 
 
 if __name__ == '__main__':
@@ -38,3 +39,18 @@ if __name__ == '__main__':
 
     print 'total_var = {}'.format(total_var)
     print 'remaining_var = {}'.format(remaining_var)
+    
+    data_dir = os.path.join(base_dir, 'data')
+    data_dir = os.path.join(data_dir, 'V7 Covariates')
+
+    filename = os.path.join(data_dir, 'GTEx_v7_Annotations_SubjectPhenotypesDS.txt')
+    f = open(filename)
+    f.readline()
+    sexes = dict()
+    for line in f:
+        items = line.strip().split()
+        sexes[items[0]] = int(items[1])
+
+    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes))
+
+

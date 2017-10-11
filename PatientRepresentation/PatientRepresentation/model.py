@@ -164,3 +164,8 @@ class PatientModel(object):
     def patient_mat(self):
         return np.concatenate([self.patient_reps[id] for id in self.patients],
                               axis=0)
+
+    @property
+    def weights(self):
+        # TODO: calculate real weights
+        return {id: 1. for id in self.patients}
