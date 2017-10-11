@@ -38,9 +38,6 @@
     <Compile Include="tissue.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="trainer.py">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
