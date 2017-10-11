@@ -41,6 +41,17 @@ class PatientModel(object):
             print self.errorFrac(dataset)
             # self.normalize()
 
+        pat_mat = self.patient_mat
+        print 'mean={}'.format(np.mean(pat_mat, axis=0))
+        print 'moment2={}'.format(pat_mat.T.dot(pat_mat))
+        print 'normalizing'
+        self.normalize()
+        print self.errorFrac(dataset)
+        pat_mat = self.patient_mat
+        print 'mean={}'.format(np.mean(pat_mat, axis=0))
+        print 'moment2={}'.format(pat_mat.T.dot(pat_mat))
+
+
     def train_transforms(self, dataset):
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
@@ -103,11 +114,15 @@ class PatientModel(object):
         # normalize variance
         reps -= patient_mean
         patient_cov = reps.T.dot(reps)/self.num_patients
-        # TODO find inverse of eigenvectors (scaled by eigenvalues**.5)
+        U, W, V = np.linalg.svd(patient_cov)
+        Einv = U.dot(np.diag(W**-.5))
+        E = np.diag(W**.5).dot(V)
 
         for patient_id in self.patients:
-            # TODO multiply by inverse s.t. cov is identity
-            pass
+            self.patient_reps[patient_id] = self.patient_reps[patient_id].dot(Einv)
+
+        for tissue_name in self.tissues:
+            self.tissue_transforms[tissue_name] = E.dot(self.tissue_transforms[tissue_name])
 
     def predict(self, patient_id, tissue_name):
         return self.patient_reps[patient_id].dot(self.tissue_transforms[tissue_name]) + self.tissue_centers[tissue_name]
@@ -154,3 +169,8 @@ class PatientModel(object):
     @property
     def tissues(self):
         return self._tissue_centers.keys()
+
+    @property
+    def patient_mat(self):
+        return np.concatenate([self.patient_reps[id] for id in self.patients],
+                              axis=0)
