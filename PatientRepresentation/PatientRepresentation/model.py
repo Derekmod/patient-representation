@@ -91,8 +91,23 @@ class PatientModel(object):
             self.tissue_centers[tissue_name] = -sum_residual/tissue.numPatients
 
     def normalize(self):
-        # TODO
-        pass
+        reps = np.concatenate([self._patient_reps[id] for id in self._patient_reps], axis=0)
+        patient_mean = np.mean(reps, axis=0)
+
+        for tissue_name in self.tissues:
+            self._tissue_centers[tissue_name] -= patient_mean.dot(self._tissue_transforms[tissue_name])
+
+        for patient_id in self.patients:
+            self.patient_reps[patient_id] -= patient_mean
+
+        # normalize variance
+        reps -= patient_mean
+        patient_cov = reps.T.dot(reps)/self.num_patients
+        # TODO find inverse of eigenvectors (scaled by eigenvalues**.5)
+
+        for patient_id in self.patients:
+            # TODO multiply by inverse s.t. cov is identity
+            pass
 
     def predict(self, patient_id, tissue_name):
         return self.patient_reps[patient_id].dot(self.tissue_transforms[tissue_name]) + self.tissue_centers[tissue_name]
@@ -127,3 +142,15 @@ class PatientModel(object):
     @property
     def dimension(self):
         return self._dimension
+
+    @property
+    def num_patients(self):
+        return len(self._patient_reps)
+
+    @property
+    def patients(self):
+        return self._patient_reps.keys()
+
+    @property
+    def tissues(self):
+        return self._tissue_centers.keys()
