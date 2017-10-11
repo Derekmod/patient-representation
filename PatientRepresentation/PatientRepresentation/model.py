@@ -23,8 +23,6 @@ class PatientModel(object):
         self._max_iter = max_iter
 
     def fit(self, dataset):
-        #self._dataset = dataset
-
         for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
             
@@ -41,16 +39,7 @@ class PatientModel(object):
             print self.errorFrac(dataset)
             # self.normalize()
 
-        pat_mat = self.patient_mat
-        print 'mean={}'.format(np.mean(pat_mat, axis=0))
-        print 'moment2={}'.format(pat_mat.T.dot(pat_mat)/self.num_patients)
-        print 'normalizing'
-        print self.errorFrac(dataset)
         self.normalize()
-        print self.errorFrac(dataset)
-        pat_mat = self.patient_mat
-        print 'mean={}'.format(np.mean(pat_mat, axis=0))
-        print 'moment2={}'.format(pat_mat.T.dot(pat_mat)/self.num_patients)
 
 
     def train_transforms(self, dataset):
@@ -103,6 +92,7 @@ class PatientModel(object):
             self.tissue_centers[tissue_name] = -sum_residual/tissue.numPatients
 
     def normalize(self):
+        # normalize mean
         patient_mean = np.mean(self.patient_mat, axis=0)
 
         for tissue_name in self.tissues:
