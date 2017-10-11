@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 ugrad_dump/
 data/
+PatientRepresentation/.vs/
 
 # C extensions
 *.so
