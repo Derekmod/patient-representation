@@ -78,13 +78,13 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
         tissue._rows[patient_id] = tissue.numPatients
         tissue._patients[patient_id] = patient
 
-    print 'got patients'
+    # print 'got patients'
 
     raw_t = [[float(val_str)
               for val_str in line.strip().split('\t')[4:]]
              for line in tissue_file]
 
-    print 'got data'
+    # print 'got data'
 
     val = np.array(raw_t).T
 
