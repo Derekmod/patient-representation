@@ -56,3 +56,11 @@ def r2correlation(model, labels): # TODO: subtract out weighted mean of x and y
     print 'y mean: {}'.format(np.mean(weighted_y))
 
     return cov*cov/(varx*vary)
+
+
+def randomCorrelation(model):
+    labels = dict()
+    for patient_id in model.patients:
+        labels[patient_id] = np.random.randint(2)
+
+    return r2correlation(model, labels)

@@ -52,5 +52,8 @@ if __name__ == '__main__':
         sexes[items[0]] = int(items[1])
 
     print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes))
+    print 'random correlations:'
+    for _ in range(50):
+        print patlearn_tools.randomCorrelation(model)
 
 

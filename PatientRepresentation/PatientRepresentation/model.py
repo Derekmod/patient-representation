@@ -30,13 +30,17 @@ class PatientModel(object):
             tissue = dataset.tissues[tissue_name]
             self._tissue_centers[tissue_name] = np.zeros((1, tissue.dimension))
             
+        prev_error = 1e16
         for ep in range(self._max_iter):
             self.train_transforms(dataset)
-            print self.errorFrac(dataset)
             self.train_patients(dataset)
-            print self.errorFrac(dataset)
             self.train_centers(dataset)
-            print self.errorFrac(dataset)
+            error = self.errorFrac(dataset)
+            print error
+            if error > prev_error:
+                self.normalize()
+                print 'normalizing'
+            prev_error = error
             # self.normalize()
 
         self.normalize()
