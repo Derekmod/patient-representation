@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def r2correlation(model, labels): # TODO: subtract out weighted mean of x and y
+def r2correlation(model, labels, unbiased=False): # TODO: subtract out weighted mean of x and y
     weighted_label_list = []
     weighted_rep_list = []
     sum_weight = 0.
@@ -52,15 +52,20 @@ def r2correlation(model, labels): # TODO: subtract out weighted mean of x and y
     varx = x.T.dot(weighted_x)[0,0]
     vary = y.T.dot(weighted_y)[0,0]
 
-    print 'x mean: {}'.format(np.mean(weighted_x))
-    print 'y mean: {}'.format(np.mean(weighted_y))
+    # print 'x mean: {}'.format(np.mean(weighted_x))
+    # print 'y mean: {}'.format(np.mean(weighted_y))
 
-    return cov*cov/(varx*vary)
+    r2_biased = cov*cov/(varx*vary)
+    if not unbiased:
+        return r2_biased
+    r2 = r2_biased * len(labels)/(len(labels)-1)
+    r2 -= 1./(len(labels)-1.)
+    return r2
 
 
-def randomCorrelation(model):
+def randomCorrelation(model, unbiased=False):
     labels = dict()
     for patient_id in model.patients:
         labels[patient_id] = np.random.randint(2)
 
-    return r2correlation(model, labels)
+    return r2correlation(model, labels, unbiased)

@@ -51,9 +51,12 @@ if __name__ == '__main__':
         items = line.strip().split()
         sexes[items[0]] = int(items[1])
 
-    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes))
+    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
+    model2 = PatientModel(max_iter=400)
+    model2.fit(dataset)
+    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model2, sexes, unbiased=True))
     print 'random correlations:'
     for _ in range(50):
-        print patlearn_tools.randomCorrelation(model)
+        print patlearn_tools.randomCorrelation(model, unbiased=True)
 
 
