@@ -4,6 +4,7 @@ import dataset as dataset_m
 from model import PatientModel
 import patlearn_tools
 
+from sklearn import svm
 
 if __name__ == '__main__':
     base_dir = os.path.dirname(os.getcwd())
@@ -58,5 +59,24 @@ if __name__ == '__main__':
     print 'random correlations:'
     for _ in range(50):
         print patlearn_tools.randomCorrelation(model, unbiased=True)
+
+    clf = svm.SVC()
+    pids = []
+    for id in sexes:
+        if id in model.patients:
+            pids += [id]
+    ntotal = len(pids)
+    ntrain = int(ntotal*4/5)
+    clf.fit([model.patient_reps[id] for id in pids[:ntrain]], [sexes[id] for id in pids[:ntrain]])
+
+    success = 0
+    for id in pids[ntrain:]:
+        pred = clf.predict(model.patient_reps[id])
+        if pred == sexes[id]:
+            success += 1
+
+    return 'correctly predicted {}/{}'.format(success, ntotal-ntrain)
+
+
 
 
