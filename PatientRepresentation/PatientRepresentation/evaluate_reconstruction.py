@@ -75,7 +75,7 @@ if __name__ == '__main__':
         if pred == sexes[id]:
             success += 1
 
-    return 'correctly predicted {}/{}'.format(success, ntotal-ntrain)
+    print 'correctly predicted {}/{}'.format(success, ntotal-ntrain)
 
 
 
