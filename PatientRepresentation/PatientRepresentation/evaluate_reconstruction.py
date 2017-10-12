@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
 
-    model = PatientModel(max_iter=400)
+    model = PatientModel(max_iter=100)
     model.fit(dataset)
 
     tissue_name = dataset.tissues.keys()[0]
@@ -53,9 +53,6 @@ if __name__ == '__main__':
         sexes[items[0]] = int(items[1])
 
     print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
-    model2 = PatientModel(max_iter=400)
-    model2.fit(dataset)
-    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model2, sexes, unbiased=True))
     print 'random correlations:'
     for _ in range(50):
         print patlearn_tools.randomCorrelation(model, unbiased=True)
@@ -67,11 +64,11 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id] for id in pids[:ntrain]], [sexes[id] for id in pids[:ntrain]])
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], [sexes[id] for id in pids[:ntrain]])
 
     success = 0
     for id in pids[ntrain:]:
-        pred = clf.predict(model.patient_reps[id])
+        pred = clf.predict(model.patient_reps[id].tolist()[0])
         if pred == sexes[id]:
             success += 1
 
