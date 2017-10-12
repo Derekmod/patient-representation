@@ -58,8 +58,8 @@ def r2correlation(model, labels, unbiased=False): # TODO: subtract out weighted 
     r2_biased = cov*cov/(varx*vary)
     if not unbiased:
         return r2_biased
-    r2 = r2_biased * len(labels)/(len(labels)-1)
-    r2 -= 1./(len(labels)-1.)
+    r2 = r2_biased * len(labels)/(len(labels)-2.)
+    r2 -= 2./(len(labels)-2.)
     return r2
 
 
