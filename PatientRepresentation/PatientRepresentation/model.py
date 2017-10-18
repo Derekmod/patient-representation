@@ -183,5 +183,5 @@ class PatientModel(object):
         return {id: 1. for id in self.patients}
 
     def weight(self, patient_id):
-        n_sample = len(self.patients[patient_id].tissues)
+        n_sample = len(self.patient_reps[patient_id].tissues)
         return float(n_sample) / float(self._weight_inertia + n_sample)
