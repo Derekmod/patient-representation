@@ -10,7 +10,7 @@ def r2correlation(model, labels, unbiased=False): # TODO: subtract out weighted 
             continue
         label = labels[patient_id]
         rep = model.patient_reps[patient_id]
-        weight = model.weight(patient_id)
+        weight = model.getWeight(patient_id)
 
         weighted_label_list += [[weight * label]]
         weighted_rep_list += [weight * rep]
@@ -29,7 +29,7 @@ def r2correlation(model, labels, unbiased=False): # TODO: subtract out weighted 
             continue
         label = np.array([[labels[patient_id]]]) - y_mean
         rep = model.patient_reps[patient_id] - z_mean
-        weight = model.weight(patient_id)
+        weight = model.getWeight(patient_id)
 
         label_list += [label]
         weighted_label_list += [weight * label]

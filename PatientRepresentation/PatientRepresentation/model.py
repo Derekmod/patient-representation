@@ -187,6 +187,6 @@ class PatientModel(object):
         # TODO: calculate real weights
         return {id: 1. for id in self.patients}
 
-    def weight(self, patient_id):
+    def getWeight(self, patient_id):
         n_sample = self._nsamples[patient_id]
         return float(n_sample) / float(self._weight_inertia + n_sample)
