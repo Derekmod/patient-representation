@@ -55,5 +55,17 @@ def loadFromDir(directory_name, verbose=False):
         tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose, explain_rat=10.)
         dataset.tissues[tissue.name] = tissue
 
+    if verbose:
+        total_var = 0.
+        kept_var = 0.
+        for tissue_name in dataset.tissues:
+            tissue = dataset.tissues[tissue_name]
+            for patient_id in tissue.patients:
+                expr = dataset.getValue(patient_id, tissue_name)
+                kept_var += expr.dot(expr.T)[0,0]
+                total_var += 1.
+
+        print 'total var explained: {}%'.format(100.*kept_var/total_var)
+
     return dataset
     

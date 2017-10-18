@@ -84,7 +84,7 @@ class PatientModel(object):
             rep_list = [None]*tissue.numPatients
             for patient_id in tissue.patients:
                 rep = self._patient_reps[patient_id]
-                rep = rep.concatenate([np.array([[1]]), rep], axis=1)
+                rep = np.concatenate([np.array([[1]]), rep], axis=1)
                 rep *= self.getWeight(patient_id)
                 rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate(rep_list)
