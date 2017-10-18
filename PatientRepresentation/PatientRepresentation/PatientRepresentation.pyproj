@@ -35,6 +35,9 @@
     <Compile Include="patient.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="patlearn_tools.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="tissue.py">
       <SubType>Code</SubType>
     </Compile>

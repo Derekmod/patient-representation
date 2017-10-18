@@ -18,12 +18,13 @@ class PatientTissueData(object):
 
 
     def addPatient(self, patient):
+        """Adds a Patient to database."""
         if patient.id in self._patients:
-            # TODO: error?
             print 'BUG: Rewriting patient'
         self._patients[patient.id] = patient
 
     def getValue(self, patient_id, tissue_name):
+        """Get (full-ish) gene expression."""
         tissue = self.tissues[tissue_name]
         row = tissue.rows[patient_id]
         return tissue.value[row:row+1, :]
@@ -37,6 +38,13 @@ class PatientTissueData(object):
         return self._tissues
 
 def loadFromDir(directory_name, verbose=False):
+    """ Loads a dataset from a folder of gene expression files.
+    Args:
+        directory_name <string>: path to folder (absolute or relative)
+        verbose <bool>: whether to output logging info
+    Returns:
+        a Dataset object with PCA applied.
+    """
     dataset = PatientTissueData()
 
     filenames = os.listdir(directory_name)

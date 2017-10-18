@@ -64,7 +64,9 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], [sexes[id] for id in pids[:ntrain]])
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], 
+            [sexes[id] for id in pids[:ntrain]],
+            [model.weight[id] for id in pids[:ntrain]])
 
     success = 0
     for id in pids[ntrain:]:

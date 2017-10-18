@@ -13,14 +13,14 @@ import numpy as np
 
 class PatientModel(object):
 
-    def __init__(self, dimension=8, max_iter=100):
+    def __init__(self, dimension=8, max_iter=100, weight_inertia=5.):
         self._patient_reps = dict()
         self._tissue_centers = dict()
         self._tissue_transforms = dict()
 
         self._dimension = dimension
-
         self._max_iter = max_iter
+        self._weight_inertia = weight_intertia
 
     def fit(self, dataset):
         for patient_id in dataset.patients:
@@ -135,6 +135,14 @@ class PatientModel(object):
 
         return remaining_var/total_var
 
+    def freeParameters(self):
+        pat_params = self._dimension * self.num_patients
+        pat_params -= self.dimension * (self.dimension+1) / 2
+
+        # PENDING: add transform params based on dimension of tissue_space
+
+        return pat_params
+
 
     @property
     def patient_reps(self):
@@ -173,3 +181,7 @@ class PatientModel(object):
     def weights(self):
         # TODO: calculate real weights
         return {id: 1. for id in self.patients}
+
+    def weight(self, patient_id):
+        n_sample = len(self.patients[patient_id].tissues)
+        return float(n_sample) / float(self._weight_intertia + n_sample)
