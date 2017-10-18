@@ -20,7 +20,7 @@ class PatientModel(object):
 
         self._dimension = dimension
         self._max_iter = max_iter
-        self._weight_inertia = weight_intertia
+        self._weight_inertia = weight_inertia
 
     def fit(self, dataset):
         for patient_id in dataset.patients:
