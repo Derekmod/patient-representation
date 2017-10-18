@@ -22,7 +22,11 @@ class PatientModel(object):
         self._max_iter = max_iter
         self._weight_inertia = weight_inertia
 
+        self._nsamples = dict()
+
     def fit(self, dataset):
+        self._nsamples = [len(dataset.patients[id].tissues) for id in dataset.patients]
+
         for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
             
@@ -183,5 +187,5 @@ class PatientModel(object):
         return {id: 1. for id in self.patients}
 
     def weight(self, patient_id):
-        n_sample = len(self.patient_reps[patient_id].tissues)
+        n_sample = self._nsamples[patient_id]
         return float(n_sample) / float(self._weight_inertia + n_sample)
