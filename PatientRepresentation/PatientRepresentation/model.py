@@ -37,9 +37,10 @@ class PatientModel(object):
             
         prev_error = 1e16
         for ep in range(self._max_iter):
-            self.train_transforms(dataset)
+            #self.train_transforms(dataset)
+            self.trainTransforms(dataset)
             self.train_patients(dataset)
-            self.train_centers(dataset)
+            #self.train_centers(dataset)
             error = self.errorFrac(dataset)
             print error
             if error > prev_error:
@@ -67,6 +68,31 @@ class PatientModel(object):
             pinv = np.linalg.pinv(patient_reps)
             #pinv = np.linalg.inv(patient_reps.T.dot(patient_reps)).dot(patient_reps.T)
             self.tissue_transforms[tissue_name] = pinv.dot(residuals)
+
+    def trainTransforms(self, dataset):
+        for tissue_name in dataset.tissues:
+            tissue = dataset.tissues[tissue_name]
+
+            expr_list = [None]*tissue.numPatients
+            for patient_id in tissue.patients:
+                expr = dataset.getValue(patient_id, tissue_name)
+                expr *= self.getWeight(patient_id)
+                expr_list += [expr]
+            expressions = np.concatenate(expr_list)
+            
+            #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
+            rep_list = [None]*tissue.numPatients
+            for patient_id in tissue.patients:
+                rep = self._patient_reps[patient_id]
+                rep = rep.concatenate([np.array([[1]]), rep], axis=1)
+                rep *= self.getWeight(patient_id)
+                rep_list += [rep]
+            pat_reps = np.concatenate(rep_list)
+
+            extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
+            self.tissue_centers[tissue_name] = extended_transform[:1,:]
+            self.tissue_transforms[tissue_name] = extended_transform[1:,:]
+
 
     def train_patients(self, dataset):
         for patient_id in dataset.patients:
@@ -126,7 +152,7 @@ class PatientModel(object):
     def predict(self, patient_id, tissue_name):
         return self.patient_reps[patient_id].dot(self.tissue_transforms[tissue_name]) + self.tissue_centers[tissue_name]
 
-    def errorFrac(self, dataset):
+    def errorFrac(self, dataset, weighted=True):
         total_var = 0.
         remaining_var = 0.
         for tissue_name in dataset.tissues:
@@ -134,9 +160,12 @@ class PatientModel(object):
             for patient_id in tissue.patients:
                 rep = dataset.getValue(patient_id, tissue_name)
                 residual = self.predict(patient_id, tissue_name) - rep
+                weight = 1.
+                if weighted:
+                    weight = self.getWeight(patient_id)
 
-                total_var += rep.T.dot(rep)[0,0]
-                remaining_var += residual.T.dot(residual)[0,0]
+                total_var += rep.T.dot(rep)[0,0] * weight
+                remaining_var += residual.T.dot(residual)[0,0] * weight
 
         return remaining_var/total_var
 
