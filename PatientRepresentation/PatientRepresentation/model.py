@@ -77,7 +77,7 @@ class PatientModel(object):
             for patient_id in tissue.patients:
                 expr = dataset.getValue(patient_id, tissue_name)
                 expr *= self.getWeight(patient_id)
-                expr_list += [expr]
+                expr_list[tissue.rows[patient_id]] = expr
             expressions = np.concatenate(expr_list)
             
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
@@ -86,7 +86,7 @@ class PatientModel(object):
                 rep = self._patient_reps[patient_id]
                 rep = rep.concatenate([np.array([[1]]), rep], axis=1)
                 rep *= self.getWeight(patient_id)
-                rep_list += [rep]
+                rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate(rep_list)
 
             extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
