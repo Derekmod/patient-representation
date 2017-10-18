@@ -44,6 +44,7 @@ class PatientModel(object):
             error = self.errorFrac(dataset)
             print error
             if error > prev_error:
+                break
                 self.normalize()
                 print 'normalizing'
             prev_error = error

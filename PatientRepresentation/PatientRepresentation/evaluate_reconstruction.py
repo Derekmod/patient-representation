@@ -52,10 +52,10 @@ if __name__ == '__main__':
         items = line.strip().split()
         sexes[items[0]] = int(items[1])
 
-    print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
-    print 'random correlations:'
-    for _ in range(50):
-        print patlearn_tools.randomCorrelation(model, unbiased=True)
+    #print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
+    #print 'random correlations:'
+    #for _ in range(50):
+    #    print patlearn_tools.randomCorrelation(model, unbiased=True)
 
     clf = svm.SVC()
     pids = []
