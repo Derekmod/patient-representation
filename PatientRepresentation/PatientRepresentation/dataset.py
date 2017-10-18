@@ -50,16 +50,20 @@ def loadFromDir(directory_name, verbose=False):
 
     filenames = os.listdir(directory_name)
 
+    total_var = 0.
+    kept_var = 0.
+    kept_dimensions = 0
     for filename in filenames:
         if verbose:
             print 'reading from ' + filename
-        tissue = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, verbose=verbose, explain_rat=10.)
+        tissue, var_exp = tissue_m.loadFromFile(os.path.join(directory_name, filename), dataset, 
+                                                verbose=verbose, explain_rat=10., ret_var=True)
+        total_var += tissue.numPatients
+        kept_var += var_exp * tissue.numPatients
+        kept_dimensions += tissue.dimension
         dataset.tissues[tissue.name] = tissue
 
     if verbose:
-        total_var = 0.
-        kept_var = 0.
-        kept_dimensions = 0
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
             kept_dimensions += tissue.value.shape[1]
@@ -69,6 +73,7 @@ def loadFromDir(directory_name, verbose=False):
                 total_var += 1.
 
         print 'total var explained: {}%'.format(100.*kept_var/total_var)
+        print 'with total dimension: {}'.format(kept_dimensions)
 
     return dataset
     

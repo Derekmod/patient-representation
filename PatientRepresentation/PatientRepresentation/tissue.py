@@ -59,7 +59,7 @@ class Tissue(object):
         return len(self._patients)
 
 
-def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.):
+def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4., ret_var=False):
     # TODO: arg check
 
     tissue_name = os.path.basename(filename).split('.')[0]
@@ -88,6 +88,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
 
     val = np.array(raw_t).T
 
+    var_exp = 0.
     if run_pca:
         pca_model = PCA(n_components=50, copy=False)
         pca_model.fit_transform(val)
@@ -110,14 +111,18 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.)
 
         #val = val.dot(U[:,:n_components])
         val = val[:,:n_components]
+        var_exp = cum_var[n_components-1]
         
         if verbose:
-            print tissue_name + ' has {} components to explain {}% variance'.format(n_components, cum_var[n_components-1])
+            print tissue_name + ' has {} components to explain {}% variance'.format(n_components, 100.*var_exp)
 
     elif verbose:
         print tissue_name + ' parsed'
 
     tissue._value = val
 
-    return tissue
+    if ret_var:
+        return tissue, var_exp
+    else:
+        return tissue
 
