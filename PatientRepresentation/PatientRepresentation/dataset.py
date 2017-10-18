@@ -64,14 +64,6 @@ def loadFromDir(directory_name, verbose=False):
         dataset.tissues[tissue.name] = tissue
 
     if verbose:
-        for tissue_name in dataset.tissues:
-            tissue = dataset.tissues[tissue_name]
-            kept_dimensions += tissue.value.shape[1]
-            for patient_id in tissue.patients:
-                expr = dataset.getValue(patient_id, tissue_name)
-                kept_var += expr.dot(expr.T)[0,0]
-                total_var += 1.
-
         print 'total var explained: {}%'.format(100.*kept_var/total_var)
         print 'with total dimension: {}'.format(kept_dimensions)
 
