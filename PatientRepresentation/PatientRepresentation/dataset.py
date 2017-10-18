@@ -6,6 +6,7 @@ Attributes:
 """
 
 import os
+import copy
 
 import tissue as tissue_m
 
@@ -27,7 +28,7 @@ class PatientTissueData(object):
         """Get (full-ish) gene expression."""
         tissue = self.tissues[tissue_name]
         row = tissue.rows[patient_id]
-        return tissue.value[row:row+1, :]
+        return copy.copy(tissue.value[row:row+1, :])
 
     @property
     def patients(self):
@@ -58,8 +59,10 @@ def loadFromDir(directory_name, verbose=False):
     if verbose:
         total_var = 0.
         kept_var = 0.
+        kept_dimensions = 0
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
+            kept_dimensions += tissue.value.shape[1]
             for patient_id in tissue.patients:
                 expr = dataset.getValue(patient_id, tissue_name)
                 kept_var += expr.dot(expr.T)[0,0]
