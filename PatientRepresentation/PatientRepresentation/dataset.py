@@ -66,6 +66,7 @@ def loadFromDir(directory_name, verbose=False):
     if verbose:
         print 'total var explained: {}%'.format(100.*kept_var/total_var)
         print 'with total dimension: {}'.format(kept_dimensions)
+        print 'in #tissues: {}'.format(len(dataset.tissues))
 
     return dataset
     
