@@ -48,9 +48,11 @@ if __name__ == '__main__':
     f = open(filename)
     f.readline()
     sexes = dict()
+    ages = dict()
     for line in f:
         items = line.strip().split()
         sexes[items[0]] = int(items[1])
+        ages[items[0]] = int(items[2].split('-')[0])
 
     #print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
     #print 'random correlations:'
@@ -64,7 +66,7 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], 
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], #remove [0]?
             [sexes[id] for id in pids[:ntrain]],
             [model.getWeight(id) for id in pids[:ntrain]])
 
@@ -74,7 +76,26 @@ if __name__ == '__main__':
         if pred == sexes[id]:
             success += 1
 
-    print 'correctly predicted {}/{}'.format(success, ntotal-ntrain)
+    print 'correctly predicted {}/{} sexes'.format(success, ntotal-ntrain)
+
+    clf = svm.LinearSVC()
+    pids = []
+    for id in ages:
+        if id in model.patients:
+            pids += [id]
+    ntotal = len(pids)
+    ntrain = int(ntotal*4/5)
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]],
+            [ages[id] for id in pids[:ntrain]],
+            [model.getWeight(id) for id in pids[:ntrain]])
+    
+    success = 0
+    for id in pids[ntrain:]:
+        pred = clf.predict(model.patient_reps[id].tolist()[0])
+        if pred == ages[id]:
+            success += 1
+
+    print 'correctly predicted {}/{} ages'.format(success, ntotal-ntrain)
 
 
 

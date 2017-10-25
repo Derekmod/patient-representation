@@ -1,0 +1,155 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{bbm}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\DeclareMathOperator*{\argmin}{arg\!\min}
+\DeclareMathOperator*{\argmax}{arg\!\max}
+
+\geometry{letterpaper, portrait, margin=1in}
+\newcommand{\ul}[0]{\underline}
+\newcommand{\hs}[1]{\hspace*{#1 cm}}
+\newcommand{\ind}[0]{\indent}
+\newcommand{\tx}[1]{\text{#1}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}{Remark}
+
+\title{Patient Representation}
+\author{Derek Modzelewski}
+
+\begin{document}
+
+\maketitle
+
+\section{Weighting Patients}
+Not all patients had the same tissues sampled. Furthermore, not all patients have the same {\it number} of tissues sampled. Thus, we are more confident about the learned representations for some patients (the ones with more samples) than for other patients (the ones with fewer samples). This factors into our prediction of the tissue transform matrices and tissue centers, which then affect the prediction of patient representations.
+
+Instead of solving for the optimal weights directly, we use the weights generated from a related problem which is significantly easier to work with. It is our belief that the weighting scheme will be optimal for our patient representation problem as well.
+
+\theorem Given many estimations $\hat{\theta}_1,\hat{\theta}_2,...,\hat{\theta}_n$ of parameter $\theta_0 \in \mathbb{R}^d$, where
+\[ \hat{\theta}_\cdot \equiv (\hat{\theta}_1,\hat{\theta}_2,...,\hat{\theta}_n) = \theta_0\mathbf{1}^T + B + u + r \]
+\[ \mathbb{E}[u] = \mathbb{E}[r] = \mathbf{0} \]
+where $B$ is the bias, $u$ is the "uncertainty" in the bias and has mean $0$ and covariance matrix $\epsilon$, and $r$ is the "random error" and has mean $0$ and covariance $DVD$ where $D$ is a diagonal matrix where $D_{i,i} = 1/\sqrt{n_i}$ $\forall i \in [n]$, and $u$ and $r$ are independent \\
+Then the estimation $\tilde{\theta}$ of $\theta_0$ which minimizes squared loss is given by $w^T\hat{\theta}_\cdot$ where
+\[ w = k(2B^TB + \epsilon + DVD)^{-1}\mathbf{1} \]
+for suitable $k \in \mathbb{R}$ {\it s.t.} $w^T\mathbf{1} = 1$ \\
+\proof any estimation $\delta(\hat{\theta}_\cdot)$ of $\theta_0$ using can be expressed as $\delta(\hat{\theta_\cdot}) = \hat{\theta}_\cdot w + v$ for some $w \in \mathbb{R}^n$ {\it s.t.} $\mathbf{1}^Tw = 1$, some $v \in \mathbb{R}^d$, for given $\hat{\theta}_\cdot$
+\begin{align*}
+\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big] &= \mathbb{E}\big[||\hat{\theta}_\cdot w + v - \theta_0||^2\big]
+\\&= \mathbb{E}\big[||\theta_0\mathbf{1}w+Bw + uw + rw + v - \theta_0||^2\big]
+\\&= \mathbb{E}\big[||\theta_0+Bw + uw + rw + v - \theta_0||^2\big]
+\\&= \mathbb{E}\big[||Bw + uw + rw + v||^2\big]
+\\&= \mathbb{E}\big[||(B+u+r)w + v||^2\big]
+\\&= \mathbb{E}\big[w^T(B+u+r)^T(B+u+r)w + 2v^T(B+u+r)w + v^Tv\big]
+\\&= \mathbb{E}\big[w^T(B+u+r)^T(B+u+r)w\big] + 2v^T\mathbb{E}\big[B+u+r\big]w + v^Tv
+\\&= w^T\mathbb{E}\big[(B+u+r)^T(B+u+r)\big]w + 2v^TBw+ v^Tv
+\\&= w^T\mathbb{E}\big[B^TB + u^Tu + r^Tr\big]w + 2v^TBw+ v^Tv
+\\&= w^T\mathbb{E}(B^TB + \epsilon + DVD)w + 2v^TBw+ v^Tv
+\end{align*}
+At minimum, the gradient with respect to $w$ and with respect to $v$ will be normal to the feasible spaces of $w$ and $u$, respectively. \\
+
+$v$ has full rank feasible region (no constraints), so only the $0$ vector is normal to its feasible region:
+\begin{align*}
+\Rightarrow 0 &= \triangledown_v \bigg(\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big]\bigg)
+\\&= \triangledown_v \Big(w^T(B^TB + \epsilon + DVD)w + 2v^TBw+ v^Tv\Big)
+\\&= \triangledown_v \Big(2v^TBw+ v^Tv\Big)
+\\&= 2Bw+ 2v
+\end{align*}
+\[ \Rightarrow v = Bw \]
+
+For $w$, our only constraint is that $\mathbf{1}^Tw = 1$ $\therefore$ forall feasible $w$, all vectors $d$ normal to the feasible region can be expressed $d = k\mathbf{1}$ for some $k \in \mathbb{R}$ \\
+\begin{align*}
+\Rightarrow k \mathbf{1} &= \triangledown_w \bigg(\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big]\bigg)
+\\&= \triangledown_w \Big(w^T(B^TB + \epsilon + DVD)w + 2v^TBw+ v^Tv\Big)
+\\&= \triangledown_w \Big(w^T(B^TB + \epsilon + DVD)w + 2v^TBw\Big)
+\\&= 2(B^TB + \epsilon + DVD)w + (2v^TB)^T
+\\&= 2(B^TB + \epsilon + DVD)w + 2B^Tv
+\\&= 2(B^TB + \epsilon + DVD)w + 2B^TBw
+\\&= 2(2B^TB + \epsilon + DVD)w
+\end{align*}
+\[ \Rightarrow w = k(2B^TB + \epsilon + DVD)^{-1}\mathbf{1} \]
+for appropriate $k$ \\
+
+
+
+\section{Weighting Patients}
+Not all patients had the same tissues sampled. Furthermore, not all patients have the same {\it number} of tissues sampled. Thus, we are more confident about the learned representations for some patients (the ones with more samples) than for other patients (the ones with fewer samples). This factors into our prediction of the tissue transform matrices and tissue centers, which then affect the prediction of patient representations.
+
+Instead of solving for the optimal weights directly, we use the weights generated from a related problem which is significantly easier to work with. It is our belief that the weighting scheme will be optimal for our patient representation problem as well.
+
+\theorem Given many estimations $\hat{\theta}_1,\hat{\theta}_2,...,\hat{\theta}_n$ of parameter $\theta_0 \in \mathbb{R}^d$, where
+\[ \hat{\theta}_\cdot \equiv (\hat{\theta}_1,\hat{\theta}_2,...,\hat{\theta}_n) = \theta_0\mathbf{1}^T + r \]
+Then the estimation $\tilde{\theta}$ of $\theta_0$ which minimizes squared loss is given by $\hat{\theta}_\cdot w + v$ where
+\[ w = k(\mathbb{E}[r^Tr] - \mathbb{E}[r]^T\mathbb{E}[r])^{-1}\mathbf{1} \]
+for suitable $k \in \mathbb{R}$ {\it s.t.} $w^T\mathbf{1} = 1$, and \\
+\[ v = -\mathbb{E}[r]w \]
+\proof any estimation $\delta(\hat{\theta}_\cdot)$ of $\theta_0$ using can be expressed as $\delta(\hat{\theta_\cdot}) = \hat{\theta}_\cdot w + v$ for some $w \in \mathbb{R}^n$ {\it s.t.} $\mathbf{1}^Tw = 1$, some $v \in \mathbb{R}^d$, for given $\hat{\theta}_\cdot$
+\begin{align*}
+\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big] &= \mathbb{E}\big[||\hat{\theta}_\cdot w + v - \theta_0||^2\big]
+\\&= \mathbb{E}\big[||\theta_0\mathbf{1}^Tw+rw + v - \theta_0||^2\big]
+\\&= \mathbb{E}\big[||rw + v||^2\big]
+\\&= \mathbb{E}\big[w^Tr^Trw + 2v^Trw + v^Tv\big]
+\\&= w^T\mathbb{E}[r^Tr]w + 2v^T\mathbb{E}[r]w+ v^Tv
+\end{align*}
+At minimum, the gradient with respect to $w$ and with respect to $v$ will be normal to the feasible spaces of $w$ and $u$, respectively. \\
+
+$v$ has full rank feasible region (no constraints), so only the $0$ vector is normal to its feasible region:
+\begin{align*}
+\Rightarrow 0 &= \triangledown_v \bigg(\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big]\bigg)
+\\&= \triangledown_v \Big(w^T\mathbb{E}[r^Tr]w + 2v^T\mathbb{E}[r]w+ v^Tv\Big)
+\\&= \triangledown_v \Big(2v^T\mathbb{E}[r]w+ v^Tv\Big)
+\\&= 2\mathbb{E}[r]w+ 2v
+\end{align*}
+\[ \Rightarrow v = -\mathbb{E}[r]w \]
+
+For $w$, our only constraint is that $\mathbf{1}^Tw = 1$ $\therefore$ forall feasible $w$, all vectors $d$ normal to the feasible region can be expressed $d = k\mathbf{1}$ for some $k \in \mathbb{R}$ \\
+\begin{align*}
+\Rightarrow k \mathbf{1} &= \triangledown_w \bigg(\mathbb{E}\big[||\delta(\hat{\theta}_\cdot) - \theta_0||^2\big]\bigg)
+\\&= \triangledown_w \Big(w^T\mathbb{E}[r^Tr]w + 2v^T\mathbb{E}[r]w+ v^Tv\Big)
+\\&= \triangledown_w \Big(w^T\mathbb{E}[r^Tr]w + 2v^T\mathbb{E}[r]w\Big)
+\\&= 2\mathbb{E}[r^Tr]w + \big(2v^T\mathbb{E}[r]\big)^T
+\\&= 2\mathbb{E}[r^Tr]w + 2\mathbb{E}[r]^Tv
+\\&= 2\mathbb{E}[r^Tr]w - 2\mathbb{E}[r]^T\mathbb{E}[r]w
+\\&= 2\big(\mathbb{E}[r^Tr] - \mathbb{E}[r]^T\mathbb{E}[r]\big)w
+\end{align*}
+\[ \Rightarrow w = k(\mathbb{E}[r^Tr] - \mathbb{E}[r]^T\mathbb{E}[r])^{-1}\mathbf{1} \]
+for appropriate $k$ \\
+
+\corollary If we restrict our estimation to be in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$, the optimal solution is given by $\hat{\theta_\cdot}w$ where
+\[ w = k\mathbb{E}[r^Tr]^{-1}\mathbf{1} \]
+for suitable $k$ as before.
+\proof Any point in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$ may be expressed as $\hat{\theta_\cdot}w$, which is equivalent to setting $v$ to $\mathbf{0}$. In the previous proof, we arrived at
+\begin{align*}
+...k\mathbf{1} &= 2\mathbb{E}[r^Tr]w + 2\mathbb{E}[r]^Tv
+\\&= 2\mathbb{E}[r^Tr]w &\because v=\mathbf{0}
+\end{align*}
+\[ \Rightarrow w = k\mathbb{E}[r^Tr]^{-1}\mathbf{1} \]
+
+\corollary In the special case that $r = u + v$ where
+\[ \mathbb{E}[u] = \mathbb{E}[v] = \mathbf{0} \]
+and $\mathbb{E}[u^Tu] = \phi I$ and $\mathbb{E}[v^Tv]$ is diagonal where $\mathbb{E}[v^Tv]_{i,i} = \gamma/n_i$ $\forall i \in [n]$, and we are restricted to estimations in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$, the optimal estimator, $\tilde{\theta}$, is
+\[ \tilde{\theta} = \frac{\sum_{i=1}^n \frac{n_i}{n_i+\gamma/\phi}\hat{\theta}_i}{\sum_{i=1}^n \frac{n_i}{n_i+\gamma/\phi}} \]
+\remark This is equivalent to placing a $n_i/(n_i+\gamma/\phi)$ weight to each estimator $\theta_i$
+\proof ...
+
+
+
+
+
+
+
+
+
+
+
+
+%
+
+\end{document}
