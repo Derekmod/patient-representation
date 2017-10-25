@@ -66,13 +66,13 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id].tolist().T for id in pids[:ntrain]], #remove [0]?
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], #remove [0]?
             [sexes[id] for id in pids[:ntrain]],
             [model.getWeight(id) for id in pids[:ntrain]])
 
     success = 0
     for id in pids[ntrain:]:
-        pred = clf.predict(model.patient_reps[id].tolist().T)
+        pred = clf.predict(model.patient_reps[id].tolist())
         if pred == sexes[id]:
             success += 1
 
@@ -85,13 +85,13 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id].tolist().T for id in pids[:ntrain]],
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]],
             [ages[id] for id in pids[:ntrain]],
             [model.getWeight(id) for id in pids[:ntrain]])
     
     success = 0
     for id in pids[ntrain:]:
-        pred = clf.predict(model.patient_reps[id].tolist().T)
+        pred = clf.predict(model.patient_reps[id].tolist())
         if pred == ages[id]:
             success += 1
 
