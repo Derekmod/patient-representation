@@ -48,11 +48,22 @@ if __name__ == '__main__':
     f = open(filename)
     f.readline()
     sexes = dict()
+    sex_counts = dict()
     ages = dict()
+    age_counts = dict()
     for line in f:
         items = line.strip().split()
-        sexes[items[0]] = int(items[1])
-        ages[items[0]] = int(items[2].split('-')[0])
+        sex = int(items[1])
+        sexes[items[0]] = sex
+        if sex not in sex_counts:
+            sex_counts[sex] = 0
+        sex_counts[sex] += 1
+
+        age = int(items[2].split('-')[0])
+        ages[items[0]] = age
+        if age not in age_counts:
+            age_counts[age] = 0
+        age_counts[age] += 1
 
     #print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
     #print 'random correlations:'
@@ -77,6 +88,7 @@ if __name__ == '__main__':
             success += 1
 
     print 'correctly predicted {}/{} sexes'.format(success, ntotal-ntrain)
+    print 'expected random: %f' % float(sum([sex_counts[sex]**2 for sex in sex_counts]))/len(pids)
 
     clf = svm.LinearSVC()
     pids = []
@@ -96,6 +108,7 @@ if __name__ == '__main__':
             success += 1
 
     print 'correctly predicted {}/{} ages'.format(success, ntotal-ntrain)
+    print 'expected random: %f' % float(sum([age_counts[age]**2 for age in age_counts]))/len(pids)
 
 
 
