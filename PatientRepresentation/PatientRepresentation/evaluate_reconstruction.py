@@ -109,6 +109,7 @@ if __name__ == '__main__':
             [model.getWeight(id) for id in pids[:ntrain]])
     
     success = 0
+    naive_success = 0
     for id in pids[ntrain:]:
         pred = clf.predict(model.patient_reps[id].tolist())
         if pred == ages[id]:
