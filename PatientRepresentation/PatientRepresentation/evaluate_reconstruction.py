@@ -4,6 +4,7 @@ import dataset as dataset_m
 from model import PatientModel
 import patlearn_tools
 
+import numpy as np
 from sklearn import svm
 
 if __name__ == '__main__':
@@ -47,11 +48,12 @@ if __name__ == '__main__':
     filename = os.path.join(data_dir, 'GTEx_v7_Annotations_SubjectPhenotypesDS.txt')
     f = open(filename)
     f.readline()
+    f_shuffled = np.random.permutation([line for line in f])
     sexes = dict()
     train_sex_counts = dict()
     ages = dict()
     train_age_counts = dict()
-    for line in f:
+    for line in f_shuffled:
         items = line.strip().split()
         sex = int(items[1])
         sexes[items[0]] = sex
