@@ -48,22 +48,24 @@ if __name__ == '__main__':
     f = open(filename)
     f.readline()
     sexes = dict()
-    sex_counts = dict()
+    train_sex_counts = dict()
     ages = dict()
-    age_counts = dict()
+    train_age_counts = dict()
     for line in f:
         items = line.strip().split()
         sex = int(items[1])
         sexes[items[0]] = sex
-        if sex not in sex_counts:
-            sex_counts[sex] = 0
-        sex_counts[sex] += 1
+        if sex not in train_sex_counts:
+            train_sex_counts[sex] = 0
+        train_sex_counts[sex] += 1
 
         age = int(items[2].split('-')[0])
         ages[items[0]] = age
-        if age not in age_counts:
-            age_counts[age] = 0
-        age_counts[age] += 1
+        if age not in train_age_counts:
+            train_age_counts[age] = 0
+        train_age_counts[age] += 1
+    naive_sex, _ = max([(sex, train_sex_counts[sex]) for sex in train_sex_counts])
+    naive_age, _ = max([(age, train_sex_counts[age]) for age in train_age_counts])
 
     #print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
     #print 'random correlations:'
@@ -77,18 +79,21 @@ if __name__ == '__main__':
             pids += [id]
     ntotal = len(pids)
     ntrain = int(ntotal*4/5)
-    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]], #remove [0]?
+    clf.fit([model.patient_reps[id].tolist()[0] for id in pids[:ntrain]],
             [sexes[id] for id in pids[:ntrain]],
             [model.getWeight(id) for id in pids[:ntrain]])
 
     success = 0
+    naive_success = 0
     for id in pids[ntrain:]:
         pred = clf.predict(model.patient_reps[id].tolist())
         if pred == sexes[id]:
             success += 1
+        if naive_sex == sexes[id]:
+            naive_success += 1
 
     print 'correctly predicted {}/{} sexes'.format(success, ntotal-ntrain)
-    print 'expected random: %f' % float(sum([sex_counts[sex]**2 for sex in sex_counts]))/len(pids)
+    print 'naive: {}/{}'.format(naive_success, ntotal-ntrain)
 
     clf = svm.LinearSVC()
     pids = []
@@ -106,10 +111,11 @@ if __name__ == '__main__':
         pred = clf.predict(model.patient_reps[id].tolist())
         if pred == ages[id]:
             success += 1
+        if naive_age == ages[id]:
+            naive_success += 1
 
     print 'correctly predicted {}/{} ages'.format(success, ntotal-ntrain)
-    print 'expected random: %f' % float(sum([age_counts[age]**2 for age in age_counts]))/len(pids)
-    print age_counts
+    print 'naive: {}/{}'.format(naive_success, ntotal-ntrain)
 
 
 
