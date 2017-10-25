@@ -109,6 +109,7 @@ if __name__ == '__main__':
 
     print 'correctly predicted {}/{} ages'.format(success, ntotal-ntrain)
     print 'expected random: %f' % float(sum([age_counts[age]**2 for age in age_counts]))/len(pids)
+    print age_counts
 
 
 
