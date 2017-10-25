@@ -64,8 +64,8 @@ if __name__ == '__main__':
         if age not in train_age_counts:
             train_age_counts[age] = 0
         train_age_counts[age] += 1
-    naive_sex, _ = max([(sex, train_sex_counts[sex]) for sex in train_sex_counts])
-    naive_age, _ = max([(age, train_sex_counts[age]) for age in train_age_counts])
+    _, naive_sex = max([(train_sex_counts[sex], sex) for sex in train_sex_counts])
+    _, naive_age = max([(train_sex_counts[age], age) for age in train_age_counts])
 
     #print 'sex correlation: {}'.format(patlearn_tools.r2correlation(model, sexes, unbiased=True))
     #print 'random correlations:'
