@@ -43,6 +43,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="README.txt" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <PropertyGroup>
