@@ -31,7 +31,7 @@ class PatientTissueData(object):
         return copy.copy(tissue.value[row:row+1, :])
 
     def removeValue(self, patient_id, tissue_name):
-        pass
+        return self.getValue(patient_id, tissue_name)
 
     def addValue(self, patient_id, tissue_name, value):
         pass
