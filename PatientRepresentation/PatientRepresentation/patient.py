@@ -17,6 +17,9 @@ class Patient(object):
     def addTissue(self, tissue):
         self._tissues[tissue.name] = tissue
 
+    def removeTissue(self, tissue_name):
+        del self._tissues[tissue_name]
+
     def getTissueVal(self, tissue_name):
         """Gets 2d col vector rep. of patient's tissue sample."""
         tissue_rep, column = self._samples[tissue_name]

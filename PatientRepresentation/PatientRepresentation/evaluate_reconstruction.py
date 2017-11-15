@@ -7,7 +7,8 @@ import patlearn_tools
 import numpy as np
 from sklearn import svm
 
-if __name__ == '__main__':
+
+def getDataset():
     base_dir = os.path.dirname(os.getcwd())
     base_dir = os.path.dirname(base_dir)
 
@@ -15,6 +16,33 @@ if __name__ == '__main__':
     data_dir = os.path.join(data_dir, 'V7 Data')
 
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
+    return dataset
+
+def LeaveOneOutReconstruction(dataset):
+    sum_err = 0.
+
+    # model = PatientModel(max_iter=100)
+    for patient_id in dataset.patients:
+        for tissue_name in patient.tissues:
+            removed_rep = dataset.removeValue(patient_id, tissue_name)
+
+            model = PatientModel()
+            model.setWeightMult(patient_id, tissue_name, 0.)
+            model.fit(dataset)
+
+            predicted_rep = model.predict(patient_id, tissue_name)
+            residual = removed_rep - predicted_rep
+
+            sum_err += residual.dot(residual.T)[0,0]
+
+            dataset.addValue(patient_id, tissue_name, removed_rep)
+
+    return sum_err
+
+
+
+if __name__ == '__main__':
+    dataset = getDataset()
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
@@ -41,6 +69,7 @@ if __name__ == '__main__':
 
     print 'total_var = {}'.format(total_var)
     print 'remaining_var = {}'.format(remaining_var)
+    print 'LOO var = {}'.format(LeaveOneOutReconstruction(dataset))
     
     data_dir = os.path.join(base_dir, 'data')
     data_dir = os.path.join(data_dir, 'V7 Covariates')

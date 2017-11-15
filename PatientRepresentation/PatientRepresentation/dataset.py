@@ -30,6 +30,12 @@ class PatientTissueData(object):
         row = tissue.rows[patient_id]
         return copy.copy(tissue.value[row:row+1, :])
 
+    def removeValue(self, patient_id, tissue_name):
+        pass
+
+    def addValue(self, patient_id, tissue_name, value):
+        pass
+
     @property
     def patients(self):
         return self._patients

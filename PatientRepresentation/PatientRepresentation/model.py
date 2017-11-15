@@ -18,6 +18,8 @@ class PatientModel(object):
         self._tissue_centers = dict()
         self._tissue_transforms = dict()
 
+        self._weight_mults = dict()
+
         self._dimension = dimension
         self._max_iter = max_iter
         self._weight_inertia = weight_inertia
@@ -77,7 +79,7 @@ class PatientModel(object):
             expr_list = [None]*tissue.numPatients
             for patient_id in tissue.patients:
                 expr = dataset.getValue(patient_id, tissue_name)
-                expr *= self.getWeight(patient_id)
+                expr *= self.getSampleWeight(patient_id, tissue_name)
                 expr_list[tissue.rows[patient_id]] = expr
             expressions = np.concatenate(expr_list)
             
@@ -86,7 +88,7 @@ class PatientModel(object):
             for patient_id in tissue.patients:
                 rep = self._patient_reps[patient_id]
                 rep = np.concatenate([np.array([[1]]), rep], axis=1)
-                rep *= self.getWeight(patient_id)
+                rep *= self.getSampleWeight(patient_id, tissue_name)
                 rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate(rep_list)
 
@@ -163,7 +165,7 @@ class PatientModel(object):
                 residual = self.predict(patient_id, tissue_name) - rep
                 weight = 1.
                 if weighted:
-                    weight = self.getWeight(patient_id)
+                    weight = self.getSampleWeight(patient_id, tissue_name)
 
                 total_var += rep.T.dot(rep)[0,0] * weight
                 remaining_var += residual.T.dot(residual)[0,0] * weight
@@ -217,6 +219,16 @@ class PatientModel(object):
         # TODO: calculate real weights
         return {id: 1. for id in self.patients}
 
+    def setWeightMult(self, patient_id, tissue_name, mult):
+        self._weight_mults[(patient_id, tissue_name)] = mult
+
     def getWeight(self, patient_id):
         n_sample = self._nsamples[patient_id]
         return float(n_sample) / float(self._weight_inertia + n_sample)
+
+    def getSampleWeight(self, patient_id, tissue_name):
+        key = (patient_id, tissue_name)
+        mult = 1.
+        if key in self._weight_mults:
+            mult = self._weight_mults[key]
+        return self.getWeight(patient_id) * mult
