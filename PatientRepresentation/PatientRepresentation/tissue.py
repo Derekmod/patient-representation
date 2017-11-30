@@ -28,7 +28,7 @@ class Tissue(object):
         self._patient_values = dict()
 
     def getValue(self, patient_id):
-        if patient_id in self._patient_values:
+        if patient_id not in self._patient_values:
             return None
         return self._patient_values[patient_id]
 

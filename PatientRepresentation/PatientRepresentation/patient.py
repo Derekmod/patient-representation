@@ -11,19 +11,30 @@ class Patient(object):
 
     def __init__(self, id):
         self._id = id
-        self._tissues = dict()
+        self._tissues = set()
         self._covariates = dict()
+        self._values = dict()
 
-    def addTissue(self, tissue):
-        self._tissues[tissue.name] = tissue
+    #def addTissue(self, tissue):
+    #    self._tissues[tissue.name] = tissue
 
-    def removeTissue(self, tissue_name):
-        del self._tissues[tissue_name]
+    #def removeTissue(self, tissue_name):
+    #    del self._tissues[tissue_name]
 
     def getValue(self, tissue_name):
-        """Gets 2d col vector rep. of patient's tissue sample."""
-        tissue_rep, column = self._samples[tissue_name]
-        return tissue_rep[:,column:column+1]
+        if tissue_name not in self._tissues:
+            return None
+        return self._values[tissue_name]
+
+    def removeValue(self, tissue_name):
+        value = self._values[tissue_name]
+        del self._values[tissue_name]
+        self._tissues.remove(tissue_name)
+        return value
+
+    def addValue(self, tissue_name, value):
+        self._values[tissue_name] = value
+        self._tissues.add(tissue_name)
 
     def addCovariate(self, covariate_name, value):
         self._covariates[covariate_name] = value
