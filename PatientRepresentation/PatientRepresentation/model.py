@@ -60,15 +60,15 @@ class PatientModel(object):
         self._tissue_values = dict()
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
-            self._tissue_values[tissue_name] = np.append([tissue.getValue(patient_id)
-                                                          for patient_id in tissue.patients])
+            self._tissue_values[tissue_name] = np.concatenate([tissue.getValue(patient_id)
+                                                               for patient_id in tissue.patients])
 
     def getPatientValues(dataset):
         self._patient_values = dict()
         for patient_id in dataset.patients:
             patient = dataset.patients[patient_id]
-            self._patient_values[patient_id] = np.append([patient.getValue(tissue_name)
-                                                          for tissue_name in patient.tissues])
+            self._patient_values[patient_id] = np.concatenate([patient.getValue(tissue_name)
+                                                               for tissue_name in patient.tissues])
 
 
     def train_transforms(self, dataset):
