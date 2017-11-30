@@ -60,8 +60,8 @@ class PatientModel(object):
         self._tissue_values = dict()
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
-            self._tissue_values[tissue_name] = np.concatenate([tissue.getValue(patient_id)
-                                                               for patient_id in tissue.patients])
+            value_list = [tissue.getValue(patient_id) for patient_id in tissue.patients]
+            self._tissue_values[tissue_name] = np.concatenate(value_list)
 
     def getPatientValues(dataset):
         self._patient_values = dict()
