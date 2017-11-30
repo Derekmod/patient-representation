@@ -27,7 +27,7 @@ def LeaveOneOutReconstruction(dataset):
             removed_rep = dataset.removeValue(patient_id, tissue_name)
 
             model = PatientModel()
-            model.setWeightMult(patient_id, tissue_name, 0.)
+            #model.setWeightMult(patient_id, tissue_name, 0.)
             model.fit(dataset)
 
             predicted_rep = model.predict(patient_id, tissue_name)

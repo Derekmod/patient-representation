@@ -56,7 +56,8 @@ class Tissue(object):
 
     @property
     def value(self):
-        return self._value
+        return None
+        #return self._value
 
     @value.setter
     def value(self, new_value):

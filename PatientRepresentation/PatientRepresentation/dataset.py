@@ -17,7 +17,6 @@ class PatientTissueData(object):
         self._tissues = dict()
         self._patients = dict()
 
-
     def addPatient(self, patient):
         """Adds a Patient to database."""
         if patient.id in self._patients:
@@ -31,10 +30,14 @@ class PatientTissueData(object):
         return copy.copy(tissue.value[row:row+1, :])
 
     def removeValue(self, patient_id, tissue_name):
-        return self.getValue(patient_id, tissue_name)
+        val = self.getValue(patient_id, tissue_name)
+        self._patients[patient_id].removeValue(tissue_name)
+        self._tissues[tissue_name].removeValue(patient_id)
+        return val
 
     def addValue(self, patient_id, tissue_name, value):
-        pass
+        self._patients[patient_id].addValue(tissue_name, value)
+        self._tissues[tissue_name].addValue(patient_id, value)
 
     @property
     def patients(self):
