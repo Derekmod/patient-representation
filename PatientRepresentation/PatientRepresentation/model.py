@@ -29,6 +29,8 @@ class PatientModel(object):
     def fit(self, dataset):
         self._nsamples = {id:len(dataset.patients[id].tissues) 
                           for id in dataset.patients}
+        self.getTissueValues(dataset)
+        self.getPatientValues(dataset)
 
         for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
@@ -54,12 +56,26 @@ class PatientModel(object):
 
         self.normalize()
 
+    def getTissueValues(self, dataset):
+        self._tissue_values = dict()
+        for tissue_name in dataset.tissues:
+            tissue = dataset.tissues[tissue_name]
+            self._tissue_values[tissue_name] = np.append([tissue.getValue(patient_id)
+                                                          for patient_id in tissue.patients])
+
+    def getPatientValues(dataset):
+        self._patient_values = dict()
+        for patient_id in dataset.patients:
+            patient = dataset.patients[patient_id]
+            self._patient_values[patient_id] = np.append([patient.getValue(tissue_name)
+                                                          for tissue_name in patient.tissues])
+
 
     def train_transforms(self, dataset):
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
 
-            residuals = tissue.value - self.tissue_centers[tissue_name]
+            residuals = self._tissue_values[tissue_name] - self.tissue_centers[tissue_name]
 
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
             rep_list = [None]*tissue.numPatients
@@ -76,12 +92,13 @@ class PatientModel(object):
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
 
-            expr_list = [None]*tissue.numPatients
-            for patient_id in tissue.patients:
-                expr = dataset.getValue(patient_id, tissue_name)
-                expr *= self.getSampleWeight(patient_id, tissue_name)
-                expr_list[tissue.rows[patient_id]] = expr
-            expressions = np.concatenate(expr_list)
+            #expr_list = [None]*tissue.numPatients
+            #for patient_id in tissue.patients:
+            #    expr = dataset.getValue(patient_id, tissue_name)
+                #expr *= self.getSampleWeight(patient_id, tissue_name)
+            #    expr_list[tissue.rows[patient_id]] = expr
+            #expressions = np.concatenate(expr_list)
+            expressions = self._tissue_values[tissue_name]
             
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
             rep_list = [None]*tissue.numPatients
@@ -105,10 +122,7 @@ class PatientModel(object):
             transforms = []
 
             for tissue_name in patient.tissues:
-                tissue = dataset.tissues[tissue_name]
-
-                patient_row = tissue.rows[patient_id]
-                residuals.append(tissue.value[patient_row:patient_row+1,:] - self.tissue_centers[tissue_name])
+                residuals.append(patient.getValue(tissue_name) - self.tissue_centers[tissue_name])
                 transforms.append(self.tissue_transforms[tissue_name])
 
             total_residual = np.concatenate(residuals, axis=1)
@@ -122,7 +136,7 @@ class PatientModel(object):
             tissue = dataset.tissues[tissue_name]
             transform = self.tissue_transforms[tissue_name]
 
-            sum_residual = -np.sum(tissue.value, axis=0).reshape(1, tissue.dimension)
+            sum_residual = -np.sum(self._tissue_values[tissue_name], axis=0).reshape(1, tissue.dimension)
 
             for patient_id in tissue.patients:
                 sum_residual += self.patient_reps[patient_id].dot(transform)

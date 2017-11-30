@@ -20,7 +20,7 @@ class Patient(object):
     def removeTissue(self, tissue_name):
         del self._tissues[tissue_name]
 
-    def getTissueVal(self, tissue_name):
+    def getValue(self, tissue_name):
         """Gets 2d col vector rep. of patient's tissue sample."""
         tissue_rep, column = self._samples[tissue_name]
         return tissue_rep[:,column:column+1]

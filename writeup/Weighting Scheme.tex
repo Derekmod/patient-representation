@@ -121,6 +121,7 @@ For $w$, our only constraint is that $\mathbf{1}^Tw = 1$ $\therefore$ forall fea
 \end{align*}
 \[ \Rightarrow w = k(\mathbb{E}[r^Tr] - \mathbb{E}[r]^T\mathbb{E}[r])^{-1}\mathbf{1} \]
 for appropriate $k$ \\
+\remark The optimal $v$ and $w$ values are independent of the dimension of the parameter space, $d$
 
 \corollary If we restrict our estimation to be in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$, the optimal solution is given by $\hat{\theta_\cdot}w$ where
 \[ w = k\mathbb{E}[r^Tr]^{-1}\mathbf{1} \]
@@ -131,13 +132,26 @@ for suitable $k$ as before.
 \\&= 2\mathbb{E}[r^Tr]w &\because v=\mathbf{0}
 \end{align*}
 \[ \Rightarrow w = k\mathbb{E}[r^Tr]^{-1}\mathbf{1} \]
+\remark It may often be convenient to separate $\mathbb{E}[r^Tr] = \mathbb{E}[r]^T\mathbb{E}[r] + Var(r)$, especially for biased estimators.
 
 \corollary In the special case that $r = u + v$ where
 \[ \mathbb{E}[u] = \mathbb{E}[v] = \mathbf{0} \]
-and $\mathbb{E}[u^Tu] = \phi I$ and $\mathbb{E}[v^Tv]$ is diagonal where $\mathbb{E}[v^Tv]_{i,i} = \gamma/n_i$ $\forall i \in [n]$, and we are restricted to estimations in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$, the optimal estimator, $\tilde{\theta}$, is
+and $\mathbb{E}[u^Tu] = \phi I$ for some $\phi \in \mathbb{R}$, $\mathbb{E}[u^Tv]=\mathbf{0}$, and $\mathbb{E}[v^Tv]$ is diagonal where $\mathbb{E}[v^Tv]_{i,i} = \gamma/n_i$ $\forall i \in [n]$, for some $\gamma \in \mathbb{R}$, and we are restricted to estimations in the convex hull of $\{\hat{\theta}_1,...,\hat{\theta}_n\}$, the optimal estimator, $\tilde{\theta}$, is
 \[ \tilde{\theta} = \frac{\sum_{i=1}^n \frac{n_i}{n_i+\gamma/\phi}\hat{\theta}_i}{\sum_{i=1}^n \frac{n_i}{n_i+\gamma/\phi}} \]
 \remark This is equivalent to placing a $n_i/(n_i+\gamma/\phi)$ weight to each estimator $\theta_i$
-\proof ...
+\proof
+\begin{align*}
+\mathbb{E}[r^Tr] &= \mathbb{E}[u^Tu] + \mathbb{E}[u^Tv] + \mathbb{E}[v^Tu] + \mathbb{E}[v^Tv]
+\\&= \phi I + \mathbb{E}[v^Tv]
+\end{align*}
+$\therefore \mathbb{E}[r^Tr]$ is diagonal where $\mathbb{E}[r^Tr]_{i,i} = \phi + \gamma/n_i \hs{.3}\forall i \in [n]$ \\
+$\Rightarrow \mathbb{E}[r^Tr]^{-1}$ is diagonal where 
+\begin{align*}
+\mathbb{E}[r^Tr]^{-1}_{i,i} &= \frac{1}{\phi+\gamma/n_i}
+\\&\propto \frac{n_i}{n_i+\gamma/\phi}
+\end{align*}
+Using Corollary @ref?? the weight given to estimator $\theta_i$ is $w_i \propto \frac{n_i}{n_i+\gamma/\phi}$ \\
+One interpretation of this is that each of our estimators, $\theta_i$, are biased (and inconsistent) with unknown bias, but each estimator has independent bias with equal variance (in whatever system generates the bias), and variance proportional to the inverse of the number of samples. This is extremely related to our problem of weighting patients, as each patient's samples help estimate our linear representation of patients and tissues, but has unknown bias from other sources (confounders), and it is very reasonable to expect the variance to be proportional to the inverse of the number of samples.
 
 
 
