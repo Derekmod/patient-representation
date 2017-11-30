@@ -25,6 +25,19 @@ class Tissue(object):
         self._rows = dict()
         self._value = None
 
+        self._patient_values = dict()
+
+    def getValue(self, patient_id):
+        if patient_id in self._patient_values:
+            return None
+        return self._patient_values[patient_id]
+
+    def addValue(self, patient_id, val):
+        self._patient_values[patient_id] = val
+
+    def removeValue(self, patient_id):
+        del self._patient_values[patient_id]
+
     @property
     def name(self):
         return self._name
@@ -120,6 +133,8 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
         print tissue_name + ' parsed'
 
     tissue._value = val
+    for row, patient_id in enumerate(patient_ids):
+        tissue.addValue(patient_id, val[row:row+1,:])
 
     if ret_var:
         return tissue, var_exp
