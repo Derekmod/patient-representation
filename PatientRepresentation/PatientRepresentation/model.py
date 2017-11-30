@@ -61,6 +61,7 @@ class PatientModel(object):
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
             value_list = [tissue.getValue(patient_id) for patient_id in tissue.patients]
+            print value_list
             self._tissue_values[tissue_name] = np.concatenate(value_list)
 
     def getPatientValues(dataset):
