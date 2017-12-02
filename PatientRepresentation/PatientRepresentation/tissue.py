@@ -18,7 +18,7 @@ class Tissue(object):
 
         self._patient_ids = set()
         self._rows = dict()
-        self._value = None
+        self._dimension = 0
 
         self._patient_values = dict()
 
@@ -47,7 +47,12 @@ class Tissue(object):
 
     @property
     def dimension(self):
-        return self._value.shape[1]
+        return self._dimension
+
+    @property
+    def dimension(self, dim):
+        # DEPRECATED: (dataset loader still uses it)
+        self._dimension = dim
 
     @property
     def num_patients(self):
