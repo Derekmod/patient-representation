@@ -29,9 +29,7 @@ class PatientTissueData(object):
 
     def getValue(self, patient_id, tissue_name):
         """Get (full-ish) gene expression."""
-        tissue = self.tissues[tissue_name]
-        row = tissue.rows[patient_id]
-        return copy.copy(tissue.value[row:row+1, :])
+        return self._tissues[tissue_name].getValue(patient_id)
 
     def removeValue(self, patient_id, tissue_name):
         val = self.getValue(patient_id, tissue_name)
