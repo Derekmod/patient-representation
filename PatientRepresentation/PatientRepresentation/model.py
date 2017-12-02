@@ -101,12 +101,12 @@ class PatientModel(object):
             expressions = self._tissue_values[tissue_name]
             
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
-            rep_list = [None]*tissue.num_patients
-            for patient_id in tissue.patient_ids:
-                rep = self._patient_reps[patient_id]
-                rep = np.concatenate([np.array([[1]]), rep], axis=1)
-                #rep *= self.getSampleWeight(patient_id, tissue_name)
-                rep_list[tissue.rows[patient_id]] = rep
+            #rep_list = [None]*tissue.num_patients
+            #for patient_id in tissue.patient_ids:
+            #    rep = self._patient_reps[patient_id]
+            #    rep = np.concatenate([np.array([[1]]), rep], axis=1)
+            #    #rep *= self.getSampleWeight(patient_id, tissue_name)
+            #    rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate([self._patient_reps[patient_id]
                                        for patient_id in tissue.patient_ids])
             pat_reps = np.concatenate(np.ones((tissue.num_patients,1)), pat_reps)
