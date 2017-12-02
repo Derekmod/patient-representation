@@ -17,7 +17,6 @@ class Tissue(object):
         self._name = name
 
         self._patient_ids = set()
-        self._rows = dict()
         self._dimension = 0
 
         self._patient_values = dict()

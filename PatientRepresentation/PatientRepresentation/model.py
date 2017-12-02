@@ -181,7 +181,8 @@ class PatientModel(object):
                 residual = self.predict(patient_id, tissue_name) - rep
                 weight = 1.
                 if weighted:
-                    weight = self.getSampleWeight(patient_id, tissue_name)
+                    #weight = self.getSampleWeight(patient_id, tissue_name)
+                    pass
 
                 total_var += rep.T.dot(rep)[0,0] * weight
                 remaining_var += residual.T.dot(residual)[0,0] * weight
@@ -238,9 +239,11 @@ class PatientModel(object):
     def setWeightMult(self, patient_id, tissue_name, mult):
         self._weight_mults[(patient_id, tissue_name)] = mult
 
-    def getWeight(self, patient_id):
-        n_sample = self._nsamples[patient_id]
-        return float(n_sample) / float(self._weight_inertia + n_sample)
+    def getPatientWeight(self, patient_id):
+        return float(n_sample) / float(self._weight_inertia + self.patients[patient_id].num_tissues)
+    
+    def getTissueWeight(self, tissue_name):
+        return float(n_sample) / float(self._weight_inertia + self.tissues[tissue_name].num_patients)
 
     def getSampleWeight(self, patient_id, tissue_name):
         key = (patient_id, tissue_name)
