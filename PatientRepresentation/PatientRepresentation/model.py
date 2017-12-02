@@ -123,7 +123,7 @@ class PatientModel(object):
             residuals = []
             transforms = []
 
-            for tissue_name in patient.tissues:
+            for tissue_name in patient.tissue_names:
                 residuals.append(patient.getValue(tissue_name) - self.tissue_centers[tissue_name])
                 transforms.append(self.tissue_transforms[tissue_name])
 
