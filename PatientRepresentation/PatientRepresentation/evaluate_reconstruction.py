@@ -21,6 +21,7 @@ def getDataset():
 def LeaveOneOutReconstruction(dataset):
     sum_err = 0.
     avg_err = dataset.total_variance / dataset.total_samples
+    print 'will need to go through %d tests:' % dataset.total_samples
 
     # model = PatientModel(max_iter=100)
     for tissue in dataset.tissues.values():
@@ -29,7 +30,7 @@ def LeaveOneOutReconstruction(dataset):
 
             model = PatientModel()
             #model.setWeightMult(patient_id, tissue_name, 0.)
-            model.fit(dataset)
+            model.fit(dataset, max_iter=20)
 
             predicted_rep = model.predict(patient_id, tissue.name)
             residual = removed_rep - predicted_rep

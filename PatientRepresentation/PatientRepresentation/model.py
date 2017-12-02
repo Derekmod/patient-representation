@@ -49,10 +49,10 @@ class PatientModel(object):
             #self.train_centers(dataset)
             error = self.errorFrac(dataset)
             print error
-            if error > prev_error:
-                break
-                self.normalize()
-                print 'normalizing'
+            #if error > prev_error:
+            #    break
+            #    self.normalize()
+            #    print 'normalizing'
             prev_error = error
             # self.normalize()
 
