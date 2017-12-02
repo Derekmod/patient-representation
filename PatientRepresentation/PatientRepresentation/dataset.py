@@ -48,7 +48,6 @@ class PatientTissueData(object):
 
         self._patients[patient_id].addValue(tissue_name, value)
         self._tissues[tissue_name].addValue(patient_id, value)
-        print 'added value to patient and tissue'
 
     @property
     def patients(self):

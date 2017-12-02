@@ -34,7 +34,7 @@ class PatientModel(object):
         self.getTissueValues(dataset)
         self.getPatientValues(dataset)
 
-        for patient_id in dataset.patient_ids:
+        for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
             
         for tissue_name in dataset.tissues:
