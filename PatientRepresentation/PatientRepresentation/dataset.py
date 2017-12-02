@@ -76,12 +76,11 @@ def loadFromDir(directory_name, verbose=False):
     for filename in filenames:
         if verbose:
             print 'reading from ' + filename
-        tissue, var_exp = loadFromFile(os.path.join(directory_name, filename), dataset, 
-                                       verbose=verbose, explain_rat=10., ret_var=True)
+        var_exp = loadFromFile(os.path.join(directory_name, filename), dataset, 
+                               verbose=verbose, explain_rat=10., ret_var=True)
         total_var += tissue.num_patients
         kept_var += var_exp * tissue.num_patients
         kept_dimensions += tissue.dimension
-        dataset.tissues[tissue.name] = tissue
 
     if verbose:
         print 'total var explained: {}%'.format(100.*kept_var/total_var)
@@ -95,7 +94,6 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
     # TODO: arg check
 
     tissue_name = os.path.basename(filename).split('.')[0]
-    tissue = Tissue(tissue_name)
 
     tissue_file = open(filename, 'r')
 
@@ -157,8 +155,5 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
     print dataset.tissues[tissue_name].num_patients
         
 
-    if ret_var:
-        return tissue, var_exp
-    else:
-        return tissue
+    return var_exp
 
