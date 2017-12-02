@@ -72,22 +72,22 @@ class PatientModel(object):
                                                                for tissue_name in patient.tissue_names])
 
 
-    def train_transforms(self, dataset):
-        for tissue_name in dataset.tissues:
-            tissue = dataset.tissues[tissue_name]
+    #def train_transforms(self, dataset):
+    #    for tissue_name in dataset.tissues:
+    #        tissue = dataset.tissues[tissue_name]
 
-            residuals = self._tissue_values[tissue_name] - self.tissue_centers[tissue_name]
+    #        residuals = self._tissue_values[tissue_name] - self.tissue_centers[tissue_name]
 
-            #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
-            rep_list = [None]*tissue.numPatients
-            for patient_id in tissue.patients:
-                rep_list[tissue.rows[patient_id]] = self.patient_reps[patient_id]
-            patient_reps = np.concatenate(rep_list)
+    #        #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
+    #        rep_list = [None]*tissue.numPatients
+    #        for patient_id in tissue.patients:
+    #            rep_list[tissue.rows[patient_id]] = self.patient_reps[patient_id]
+    #        patient_reps = np.concatenate(rep_list)
 
-            # transform = least squares solver
-            pinv = np.linalg.pinv(patient_reps)
-            #pinv = np.linalg.inv(patient_reps.T.dot(patient_reps)).dot(patient_reps.T)
-            self.tissue_transforms[tissue_name] = pinv.dot(residuals)
+    #        # transform = least squares solver
+    #        pinv = np.linalg.pinv(patient_reps)
+    #        #pinv = np.linalg.inv(patient_reps.T.dot(patient_reps)).dot(patient_reps.T)
+    #        self.tissue_transforms[tissue_name] = pinv.dot(residuals)
 
     def trainTransforms(self, dataset):
         for tissue_name in dataset.tissues:
@@ -106,7 +106,7 @@ class PatientModel(object):
             for patient_id in tissue.patients:
                 rep = self._patient_reps[patient_id]
                 rep = np.concatenate([np.array([[1]]), rep], axis=1)
-                rep *= self.getSampleWeight(patient_id, tissue_name)
+                #rep *= self.getSampleWeight(patient_id, tissue_name)
                 rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate(rep_list)
 
