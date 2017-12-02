@@ -61,16 +61,14 @@ class PatientModel(object):
     def getTissueValues(self, dataset):
         self._tissue_values = dict()
         for tissue in dataset.tissues.values():
-            print 'canonizing %s' % tissue.name
             value_list = [tissue.getValue(patient_id) for patient_id in tissue.patient_ids]
-            print value_list
             self._tissue_values[tissue.name] = np.concatenate(value_list)
 
     def getPatientValues(self, dataset):
         self._patient_values = dict()
         for patient in dataset.patients.values():
             self._patient_values[patient.id] = np.concatenate([patient.getValue(tissue_name)
-                                                               for tissue_name in patient.tissue_names])
+                                                               for tissue_name in patient.tissue_names], axis=1)
 
 
     #def train_transforms(self, dataset):
@@ -109,7 +107,9 @@ class PatientModel(object):
                 rep = np.concatenate([np.array([[1]]), rep], axis=1)
                 #rep *= self.getSampleWeight(patient_id, tissue_name)
                 rep_list[tissue.rows[patient_id]] = rep
-            pat_reps = np.concatenate(rep_list)
+            pat_reps = np.concatenate([self._patient_reps[patient_id]
+                                       for patient_id in tissue.patient_ids])
+            pat_reps = np.concatenate(np.ones((tissue.num_patients,1)), pat_reps)
 
             extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
             self.tissue_centers[tissue_name] = extended_transform[:1,:]
