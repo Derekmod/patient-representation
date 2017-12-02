@@ -49,7 +49,7 @@ class Tissue(object):
     def dimension(self):
         return self._dimension
 
-    @property
+    @property.setter
     def dimension(self, dim):
         # DEPRECATED: (dataset loader still uses it)
         self._dimension = dim
