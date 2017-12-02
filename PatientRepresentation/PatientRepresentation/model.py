@@ -116,7 +116,7 @@ class PatientModel(object):
             self.tissue_transforms[tissue_name] = extended_transform[1:,:]
 
 
-    def train_patients(self, dataset):
+    def trainPatients(self, dataset):
         for patient_id in dataset.patients:
             patient = dataset.patients[patient_id]
 
