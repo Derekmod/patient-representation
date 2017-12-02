@@ -51,4 +51,4 @@ class Tissue(object):
 
     @property
     def num_patients(self):
-        return len(self._patients)
+        return len(self._patient_ids)
