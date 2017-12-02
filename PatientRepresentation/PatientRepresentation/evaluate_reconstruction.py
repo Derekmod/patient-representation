@@ -37,7 +37,7 @@ def LeaveOneOutReconstruction(dataset):
         rep_var = removed_rep.dot(removed_rep.T)[0,0]
         sum_var += rep_var
 
-        model = PatientModel(max_iter=20, dimension=4)
+        model = PatientModel(max_iter=50, dimension=4)
         #model.setWeightMult(patient_id, tissue_name, 0.)
         model.fit(dataset)
 
