@@ -152,7 +152,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
         #tissue.addValue(patient_id, val[row:row+1,:])
         #dataset.patients[patient_id].addValue(tissue_name, val[row:row+1,:])
 
-    dataset.tissues[tissue_name].dimension = val.shape[1]
+    dataset.tissues[tissue_name]._dimension = val.shape[1]
 
     print dataset.tissues[tissue_name].num_patients
         
