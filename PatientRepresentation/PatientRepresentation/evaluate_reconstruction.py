@@ -54,9 +54,6 @@ if __name__ == '__main__':
     tissue_name = dataset.tissues.keys()[0]
     tissue = dataset.tissues[tissue_name]
 
-    patient_id = tissue.patients.keys()[0]
-    patient = tissue.patients[patient_id]
-
     # print tissue.value[tissue.rows[patient_id],:]
     # print model.predict(patient_id, tissue_name)
 
@@ -64,7 +61,7 @@ if __name__ == '__main__':
     remaining_var = 0.
     for tissue_name in dataset.tissues:
         tissue = dataset.tissues[tissue_name]
-        for patient_id in tissue.patients:
+        for patient_id in tissue.patient_ids:
             rep = dataset.getValue(patient_id, tissue_name)
             residual = model.predict(patient_id, tissue_name) - rep
 

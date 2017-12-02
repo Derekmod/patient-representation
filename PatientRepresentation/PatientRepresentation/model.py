@@ -140,7 +140,7 @@ class PatientModel(object):
 
             sum_residual = -np.sum(self._tissue_values[tissue_name], axis=0).reshape(1, tissue.dimension)
 
-            for patient_id in tissue.patients:
+            for patient_id in tissue.patient_ids:
                 sum_residual += self.patient_reps[patient_id].dot(transform)
 
             self.tissue_centers[tissue_name] = -sum_residual/tissue.num_patients
@@ -176,7 +176,7 @@ class PatientModel(object):
         remaining_var = 0.
         for tissue_name in dataset.tissues:
             tissue = dataset.tissues[tissue_name]
-            for patient_id in tissue.patients:
+            for patient_id in tissue.patient_ids:
                 rep = dataset.getValue(patient_id, tissue_name)
                 residual = self.predict(patient_id, tissue_name) - rep
                 weight = 1.
