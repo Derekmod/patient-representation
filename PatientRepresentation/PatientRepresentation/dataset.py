@@ -7,6 +7,7 @@ Attributes:
 
 import os
 import copy
+import numpy as np
 
 from tissue import Tissue
 from patient import Patient
