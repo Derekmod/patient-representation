@@ -23,23 +23,23 @@ def LeaveOneOutReconstruction(dataset):
     avg_err = dataset.total_variance / dataset.total_samples
 
     # model = PatientModel(max_iter=100)
-    for patient_id in dataset.patients:
-        for tissue_name in patient.tissue_names:
-            removed_rep = dataset.removeValue(patient_id, tissue_name)
+    for tissue in dataset.tissues.values():
+        for patient_id in tissue.patient_ids:
+            removed_rep = dataset.removeValue(patient_id, tissue.name)
 
             model = PatientModel()
             #model.setWeightMult(patient_id, tissue_name, 0.)
             model.fit(dataset)
 
-            predicted_rep = model.predict(patient_id, tissue_name)
+            predicted_rep = model.predict(patient_id, tissue.name)
             residual = removed_rep - predicted_rep
 
             err = residual.dot(residual.T)[0,0]
             sum_err += err
-            print 'error reconstructing %s,%s: %f' % (patient_id, tissue_name, err)
+            print 'error reconstructing %s,%s: %f' % (patient_id, tissue.name, err)
             print 'random (roughly): %f' % (avg_err)
 
-            dataset.addValue(patient_id, tissue_name, removed_rep)
+            dataset.addValue(patient_id, tissue.name, removed_rep)
 
     return sum_err
 
@@ -47,10 +47,7 @@ def LeaveOneOutReconstruction(dataset):
 
 if __name__ == '__main__':
     dataset = getDataset()
-    for tissue in dataset.tissues.values():
-        print '%s: %d %d' % (tissue.name, tissue.num_patients, len(tissue.patient_ids))
-    for patient in dataset.patients.values():
-        print '%s: %d %d' % (patient.id, patient.num_tissues, len(patient.tissue_names))
+    print LeaveOneOutReconstruction(dataset)
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
