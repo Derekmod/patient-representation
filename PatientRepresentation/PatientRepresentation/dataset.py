@@ -153,8 +153,5 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
 
     dataset.tissues[tissue_name]._dimension = val.shape[1]
 
-    print dataset.tissues[tissue_name].num_patients
-        
-
     return var_exp * dataset.tissues[tissue_name].num_patients
 
