@@ -109,7 +109,7 @@ class PatientModel(object):
             #    rep_list[tissue.rows[patient_id]] = rep
             pat_reps = np.concatenate([self._patient_reps[patient_id]
                                        for patient_id in tissue.patient_ids])
-            pat_reps = np.concatenate(np.ones((tissue.num_patients,1)), pat_reps)
+            pat_reps = np.concatenate((np.ones((tissue.num_patients,1)), pat_reps), axis=1)
 
             extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
             self.tissue_centers[tissue_name] = extended_transform[:1,:]
