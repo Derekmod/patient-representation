@@ -8,7 +8,7 @@ Attributes:
 import os
 import copy
 
-import tissue as tissue_m
+from tissue import Tissue
 from patient import Patient
 
 
@@ -41,7 +41,7 @@ class PatientTissueData(object):
         if patient_id not in self._patients:
             self._patients[patient_id] = Patient(patient_id)
         if tissue_name not in self._tissues:
-            self._tissues[tissue_name] = tissue_m.Tissue(tissue_name)
+            self._tissues[tissue_name] = Tissue(tissue_name)
 
         self._patients[patient_id].addValue(tissue_name, value)
         self._tissues[tissue_name].addValue(patient_id, value)
