@@ -42,19 +42,21 @@ class PatientModel(object):
             self._tissue_centers[tissue_name] = np.zeros((1, tissue.dimension))
             
         prev_error = 1e16
+        pat_verbose=False
         for ep in range(self._max_iter):
             #self.train_transforms(dataset)
             self.trainTransforms(dataset)
             print 'after transform: %f' % self.errorFrac(dataset)
-            self.trainPatients(dataset)
+            self.trainPatients(dataset, pat_verbose)
             #self.train_centers(dataset)
             print 'after patients: %f' % self.errorFrac(dataset)
             error = self.errorFrac(dataset)
             #print error
-            #if error > prev_error:
-            #    break
-            #    self.normalize()
-            #    print 'normalizing'
+            if error > prev_error:
+                pat_verbose=True
+                pass
+                self.normalize()
+                print 'normalizing'
             prev_error = error
             # self.normalize()
 
@@ -118,7 +120,7 @@ class PatientModel(object):
             self.tissue_transforms[tissue_name] = extended_transform[1:,:]
 
 
-    def trainPatients(self, dataset):
+    def trainPatients(self, dataset, verbose=False):
         for patient_id in dataset.patients:
             patient = dataset.patients[patient_id]
 
@@ -133,25 +135,27 @@ class PatientModel(object):
             total_transform = np.concatenate(transforms, axis=1)
 
             pinv = np.linalg.pinv(total_transform)
-            sum_err = 0.
-            for tissue_name in patient.tissue_names:
-                tissue = dataset.tissues[tissue_name]
-                rep = dataset.getValue(patient_id, tissue_name)
-                residual = self.predict(patient_id, tissue_name) - rep
-                weight = 1.
+            if verbose:
+                sum_err = 0.
+                for tissue_name in patient.tissue_names:
+                    tissue = dataset.tissues[tissue_name]
+                    rep = dataset.getValue(patient_id, tissue_name)
+                    residual = self.predict(patient_id, tissue_name) - rep
+                    weight = 1.
 
-                sum_err += residual.T.dot(residual)[0,0] * weight
-            print 'loss before change: %f' % sum_err
+                    sum_err += residual.T.dot(residual)[0,0] * weight
+                print 'loss before change: %f' % sum_err
             self.patient_reps[patient_id] = total_residual.dot(pinv)
-            sum_err = 0.
-            for tissue_name in patient.tissue_names:
-                tissue = dataset.tissues[tissue_name]
-                rep = dataset.getValue(patient_id, tissue_name)
-                residual = self.predict(patient_id, tissue_name) - rep
-                weight = 1.
+            if verbose:
+                sum_err = 0.
+                for tissue_name in patient.tissue_names:
+                    tissue = dataset.tissues[tissue_name]
+                    rep = dataset.getValue(patient_id, tissue_name)
+                    residual = self.predict(patient_id, tissue_name) - rep
+                    weight = 1.
 
-                sum_err += residual.T.dot(residual)[0,0] * weight
-            print 'loss after change: %f' % sum_err
+                    sum_err += residual.T.dot(residual)[0,0] * weight
+                print 'loss after change: %f' % sum_err
 
     def train_centers(self, dataset):
         for tissue_name in dataset.tissues:
