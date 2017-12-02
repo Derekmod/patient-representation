@@ -31,7 +31,7 @@ def LeaveOneOutReconstruction(dataset):
     # model = PatientModel(max_iter=100)
     sum_err = 0.
     sum_err2 = 0.
-    for sample_no, tissue_name, patient_id in enumerate(samples):
+    for sample_no, (tissue_name, patient_id) in enumerate(samples):
         removed_rep = dataset.removeValue(patient_id, tissue.name)
 
         model = PatientModel(max_iter=20, dimension=5)
