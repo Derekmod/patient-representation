@@ -102,7 +102,7 @@ class PatientModel(object):
             
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
             rep_list = [None]*tissue.num_patients
-            for patient_id in tissue.patients:
+            for patient_id in tissue.patient_ids:
                 rep = self._patient_reps[patient_id]
                 rep = np.concatenate([np.array([[1]]), rep], axis=1)
                 #rep *= self.getSampleWeight(patient_id, tissue_name)
