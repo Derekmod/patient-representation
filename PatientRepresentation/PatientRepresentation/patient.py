@@ -45,3 +45,7 @@ class Patient(object):
     @property
     def tissue_names(self):
         return self._tissue_names
+
+    @property
+    def num_tissues(self):
+        return len(self._tissue_names)

@@ -43,6 +43,10 @@ def LeaveOneOutReconstruction(dataset):
 
 if __name__ == '__main__':
     dataset = getDataset()
+    for tissue in dataset.tissues.values():
+        print '%s: %d %d' % (tissue.name, tissue.num_patients, len(tissue.patient_ids))
+    for patient in dataset.patients.values():
+        print '%s: %d %d' % (patient.id, patient.num_tissues, len(patient.tissue_names))
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
