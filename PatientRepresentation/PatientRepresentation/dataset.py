@@ -48,6 +48,7 @@ class PatientTissueData(object):
 
         self._patients[patient_id].addValue(tissue_name, value)
         self._tissues[tissue_name].addValue(patient_id, value)
+        print 'added value to patient and tissue'
 
     @property
     def patients(self):
@@ -146,11 +147,12 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
     #        patient = Patient(patient_id)
     #        dataset.addPatient(patient)
 
-    tissue._value = val
     for row, patient_id in enumerate(patient_ids):
         dataset.addValue(patient_id, tissue_name, val[row:row+1,:])
         #tissue.addValue(patient_id, val[row:row+1,:])
         #dataset.patients[patient_id].addValue(tissue_name, val[row:row+1,:])
+
+    print dataset.tissues[tissue_name].num_patients
         
 
     if ret_var:
