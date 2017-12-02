@@ -7,7 +7,9 @@ Attributes:
 
 import os
 import copy
+
 import numpy as np
+from sklearn.decomposition import PCA
 
 from tissue import Tissue
 from patient import Patient

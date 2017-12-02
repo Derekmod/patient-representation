@@ -9,10 +9,6 @@ Attributes:
     #dataset: <Dataset> dataset that owns this Tissue
 """
 
-import numpy as np
-from sklearn.decomposition import PCA
-import os
-
 from patient import Patient
 
 class Tissue(object):
