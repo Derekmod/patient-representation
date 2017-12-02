@@ -169,6 +169,8 @@ class PatientModel(object):
             self.tissue_transforms[tissue_name] = E.dot(self.tissue_transforms[tissue_name])
 
     def predict(self, patient_id, tissue_name):
+        if patient_id not in self.patients or tissue_name not in self.tissues:
+            return None
         return self.patient_reps[patient_id].dot(self.tissue_transforms[tissue_name]) + self.tissue_centers[tissue_name]
 
     def errorFrac(self, dataset, weighted=True):

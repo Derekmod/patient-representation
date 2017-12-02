@@ -42,7 +42,9 @@ def LeaveOneOutReconstruction(dataset):
         model.fit(dataset)
 
         predicted_rep = model.predict(patient_id, tissue_name)
-        residual = removed_rep - predicted_rep
+        residual = removed_rep
+        if predicted_rep is not None:
+            residual = removed_rep - predicted_rep
 
         err = residual.dot(residual.T)[0,0]
         sum_err += err
@@ -55,6 +57,7 @@ def LeaveOneOutReconstruction(dataset):
             var_err = (sum_err2 - sum_err*sum_err/(sample_no+1))/(sample_no * (sample_no+1))
             print 'total LOOR err = %f +/- %f' % (mean_err, 2*var_err**.5)
             print 'total ZERO err = %f' % (sum_var / (sample_no+1))
+
 
         dataset.addValue(patient_id, tissue_name, removed_rep)
 

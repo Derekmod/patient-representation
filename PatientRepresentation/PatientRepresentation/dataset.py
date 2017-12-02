@@ -34,7 +34,11 @@ class PatientTissueData(object):
     def removeValue(self, patient_id, tissue_name):
         val = self.getValue(patient_id, tissue_name)
         self._patients[patient_id].removeValue(tissue_name)
+        if self._patients[patient_id].num_tissues == 0:
+            del self._patients[patient_id]
         self._tissues[tissue_name].removeValue(patient_id)
+        if self._tissues[tissue_name].num_patients == 0:
+            del self._tissues[tissue_name]
         # TODO: check if patient or tissue has no data
         return val
 
