@@ -49,7 +49,7 @@ class PatientModel(object):
             self.trainPatients(dataset)
             #self.train_centers(dataset)
             print 'after patients: %f' % self.errorFrac(dataset)
-            #error = self.errorFrac(dataset)
+            error = self.errorFrac(dataset)
             #print error
             #if error > prev_error:
             #    break
