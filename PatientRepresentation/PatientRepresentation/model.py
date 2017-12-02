@@ -133,7 +133,25 @@ class PatientModel(object):
             total_transform = np.concatenate(transforms, axis=1)
 
             pinv = np.linalg.pinv(total_transform)
+            sum_err = 0.
+            for tissue_name in patient.tissue_names:
+                tissue = dataset.tissues[tissue_name]
+                rep = dataset.getValue(patient_id, tissue_name)
+                residual = self.predict(patient_id, tissue_name) - rep
+                weight = 1.
+
+                sum_err += residual.T.dot(residual)[0,0] * weight
+            print 'loss before change: %f' % sum_err
             self.patient_reps[patient_id] = total_residual.dot(pinv)
+            sum_err = 0.
+            for tissue_name in patient.tissue_names:
+                tissue = dataset.tissues[tissue_name]
+                rep = dataset.getValue(patient_id, tissue_name)
+                residual = self.predict(patient_id, tissue_name) - rep
+                weight = 1.
+
+                sum_err += residual.T.dot(residual)[0,0] * weight
+            print 'loss after change: %f' % sum_err
 
     def train_centers(self, dataset):
         for tissue_name in dataset.tissues:
