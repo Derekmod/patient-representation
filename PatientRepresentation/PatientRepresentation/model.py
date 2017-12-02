@@ -61,6 +61,7 @@ class PatientModel(object):
     def getTissueValues(self, dataset):
         self._tissue_values = dict()
         for tissue in dataset.tissues.values():
+            print 'canonizing %s' % tissue.name
             value_list = [tissue.getValue(patient_id) for patient_id in tissue.patient_ids]
             print value_list
             self._tissue_values[tissue.name] = np.concatenate(value_list)

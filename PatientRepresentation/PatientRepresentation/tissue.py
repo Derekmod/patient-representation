@@ -30,6 +30,7 @@ class Tissue(object):
     def addValue(self, patient_id, val):
         self._patient_values[patient_id] = val
         self._patient_ids.add(patient_id)
+        print self._patient_ids
 
     def removeValue(self, patient_id):
         value = self._patient_values[patient_id]
