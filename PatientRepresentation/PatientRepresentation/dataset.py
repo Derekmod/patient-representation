@@ -77,8 +77,8 @@ def loadFromDir(directory_name, verbose=False):
             print 'reading from ' + filename
         tissue, var_exp = loadFromFile(os.path.join(directory_name, filename), dataset, 
                                        verbose=verbose, explain_rat=10., ret_var=True)
-        total_var += tissue.numPatients
-        kept_var += var_exp * tissue.numPatients
+        total_var += tissue.num_patients
+        kept_var += var_exp * tissue.num_patients
         kept_dimensions += tissue.dimension
         dataset.tissues[tissue.name] = tissue
 

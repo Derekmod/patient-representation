@@ -102,7 +102,7 @@ class PatientModel(object):
             expressions = self._tissue_values[tissue_name]
             
             #patient_reps = concatenate vertically self.patient_reps[patient_id] for patient_id in tissue.patients
-            rep_list = [None]*tissue.numPatients
+            rep_list = [None]*tissue.num_patients
             for patient_id in tissue.patients:
                 rep = self._patient_reps[patient_id]
                 rep = np.concatenate([np.array([[1]]), rep], axis=1)
@@ -142,7 +142,7 @@ class PatientModel(object):
             for patient_id in tissue.patients:
                 sum_residual += self.patient_reps[patient_id].dot(transform)
 
-            self.tissue_centers[tissue_name] = -sum_residual/tissue.numPatients
+            self.tissue_centers[tissue_name] = -sum_residual/tissue.num_patients
 
     def normalize(self):
         # normalize mean
