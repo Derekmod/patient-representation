@@ -42,7 +42,7 @@ class Tissue(object):
         return self._name
 
     @property
-    def patients_ids(self):
+    def patient_ids(self):
         return self._patient_ids
 
     @property
