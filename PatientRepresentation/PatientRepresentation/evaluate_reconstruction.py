@@ -50,7 +50,7 @@ def LeaveOneOutReconstruction(dataset):
         if sample_no > 0:
             mean_err = sum_err/(sample_no+1)
             var_err = (sum_err2 - sum_err*sum_err/(sample_no+1))/sample_no
-        print 'total LOOR err = %f +/- %f' % (mean_err, var_err**.5)
+            print 'total LOOR err = %f +/- %f' % (mean_err, var_err**.5)
 
         dataset.addValue(patient_id, tissue_name, removed_rep)
 
