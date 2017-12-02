@@ -17,26 +17,29 @@ from patient import Patient
 
 class Tissue(object):
 
-    def __init__(self, name, dataset=None):
+    def __init__(self, name):
         self._name = name
-        #self._dataset = dataset
 
-        self._patients = dict()
+        self._patient_ids = set()
         self._rows = dict()
         self._value = None
 
         self._patient_values = dict()
 
     def getValue(self, patient_id):
-        if patient_id not in self._patient_values:
+        if patient_id not in self._patient_ids:
             return None
         return self._patient_values[patient_id]
 
     def addValue(self, patient_id, val):
         self._patient_values[patient_id] = val
+        self._patient_ids.add(patient_id)
 
     def removeValue(self, patient_id):
+        value = self._patient_values[patient_id]
         del self._patient_values[patient_id]
+        self._patient_ids.remove(patient_id)
+        return value
 
     @property
     def name(self):
@@ -47,17 +50,8 @@ class Tissue(object):
     #    return self._dataset
 
     @property
-    def patients(self):
-        return self._patients
-
-    @property
-    def rows(self):
-        return self._rows
-
-    @property
-    def value(self):
-        return None
-        #return self._value
+    def patients_ids(self):
+        return self._patient_ids
 
     @value.setter
     def value(self, new_value):
@@ -69,28 +63,19 @@ class Tissue(object):
         return self._value.shape[1]
 
     @property
-    def numPatients(self):
+    def num_patients(self):
         return len(self._patients)
 
-
+# TODO: SHOULD BE SEPARATED FROM tissue.py
 def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4., ret_var=False):
     # TODO: arg check
 
     tissue_name = os.path.basename(filename).split('.')[0]
-    tissue = Tissue(tissue_name, dataset)
+    tissue = Tissue(tissue_name)
 
     tissue_file = open(filename, 'r')
 
     patient_ids = tissue_file.readline().strip().split('\t')[4:]
-    for patient_id in patient_ids:
-        if patient_id not in dataset.patients:
-            patient = Patient(patient_id)
-            dataset.addPatient(patient)
-        patient = dataset.patients[patient_id]
-        patient.addTissue(tissue)
-        
-        tissue._rows[patient_id] = tissue.numPatients
-        tissue._patients[patient_id] = patient
 
     # print 'got patients'
 
@@ -132,10 +117,17 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
 
     elif verbose:
         print tissue_name + ' parsed'
+        
+    for patient_id in patient_ids:
+        if patient_id not in dataset.patients:
+            patient = Patient(patient_id)
+            dataset.addPatient(patient)
 
     tissue._value = val
     for row, patient_id in enumerate(patient_ids):
         tissue.addValue(patient_id, val[row:row+1,:])
+        dataset.patients[patient_id].addValue(tissue_name, val[row:row+1,:])
+        
 
     if ret_var:
         return tissue, var_exp

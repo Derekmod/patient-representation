@@ -27,12 +27,14 @@ class PatientModel(object):
         self._nsamples = dict()
 
     def fit(self, dataset):
-        self._nsamples = {id:len(dataset.patients[id].tissues) 
-                          for id in dataset.patients}
+        self._patient_samples = {id:len(dataset.patients[id].tissue_names) 
+                                 for id in dataset.patients}
+        self._tissue_samples = {name:len(dataset.tissues[name].patient_ids)
+                                for name in dataset.tissues}
         self.getTissueValues(dataset)
         self.getPatientValues(dataset)
 
-        for patient_id in dataset.patients:
+        for patient_id in dataset.patient_ids:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
             
         for tissue_name in dataset.tissues:
@@ -43,7 +45,7 @@ class PatientModel(object):
         for ep in range(self._max_iter):
             #self.train_transforms(dataset)
             self.trainTransforms(dataset)
-            self.train_patients(dataset)
+            self.trainPatients(dataset)
             #self.train_centers(dataset)
             error = self.errorFrac(dataset)
             print error
@@ -58,18 +60,16 @@ class PatientModel(object):
 
     def getTissueValues(self, dataset):
         self._tissue_values = dict()
-        for tissue_name in dataset.tissues:
-            tissue = dataset.tissues[tissue_name]
-            value_list = [tissue.getValue(patient_id) for patient_id in tissue.patients]
-            print value_list
-            self._tissue_values[tissue_name] = np.concatenate(value_list)
+        for tissue in dataset.tissues.values():
+            value_list = [tissue.getValue(patient_id) for patient_id in tissue.patient_ids]
+            #print value_list
+            self._tissue_values[tissue.name] = np.concatenate(value_list)
 
-    def getPatientValues(dataset):
+    def getPatientValues(self, dataset):
         self._patient_values = dict()
-        for patient_id in dataset.patients:
-            patient = dataset.patients[patient_id]
-            self._patient_values[patient_id] = np.concatenate([patient.getValue(tissue_name)
-                                                               for tissue_name in patient.tissues])
+        for patient in dataset.patients.values():
+            self._patient_values[patient.id] = np.concatenate([patient.getValue(tissue_name)
+                                                               for tissue_name in patient.tissue_names])
 
 
     def train_transforms(self, dataset):
