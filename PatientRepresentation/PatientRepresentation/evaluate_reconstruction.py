@@ -32,19 +32,19 @@ def LeaveOneOutReconstruction(dataset):
     sum_err = 0.
     sum_err2 = 0.
     for sample_no, (tissue_name, patient_id) in enumerate(samples):
-        removed_rep = dataset.removeValue(patient_id, tissue.name)
+        removed_rep = dataset.removeValue(patient_id, tissue_name)
 
         model = PatientModel(max_iter=20, dimension=5)
         #model.setWeightMult(patient_id, tissue_name, 0.)
         model.fit(dataset)
 
-        predicted_rep = model.predict(patient_id, tissue.name)
+        predicted_rep = model.predict(patient_id, tissue_name)
         residual = removed_rep - predicted_rep
 
         err = residual.dot(residual.T)[0,0]
         sum_err += err
         sum_err2 += err*err
-        print 'error reconstructing %s,%s: %f' % (patient_id, tissue.name, err)
+        print 'error reconstructing %s,%s: %f' % (patient_id, tissue_name, err)
         print 'random (roughly): %f' % (avg_err)
         
         if sample_no > 0:
@@ -52,7 +52,7 @@ def LeaveOneOutReconstruction(dataset):
             var_err = (sum_err2 - sum_err*sum_err/(sample_no+1))/sample_no
         print 'total LOOR err = %f +/- %f' % (mean_err, var_err**.5)
 
-        dataset.addValue(patient_id, tissue.name, removed_rep)
+        dataset.addValue(patient_id, tissue_name, removed_rep)
 
     return sum_err
 
