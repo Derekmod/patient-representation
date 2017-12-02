@@ -55,6 +55,22 @@ class PatientTissueData(object):
     def tissues(self):
         return self._tissues
 
+    @property
+    def total_samples(self):
+        ans = 0
+        for tissue in self.tissues.values():
+            ans += tissue.num_patients
+        return ans
+
+    @property
+    def total_variance(self):
+        ans = 0.
+        for tissue in self.tissues.values():
+            for patient_id in tissue.patient_ids:
+                rep = self.getValue(patient_id, tissue.name)
+                ans += rep.dot(rep.T)[0,0]
+        return ans
+
 def loadFromDir(directory_name, verbose=False):
     """ Loads a dataset from a folder of gene expression files.
     Args:

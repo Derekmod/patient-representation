@@ -20,10 +20,11 @@ def getDataset():
 
 def LeaveOneOutReconstruction(dataset):
     sum_err = 0.
+    avg_err = dataset.total_variance / dataset.total_samples
 
     # model = PatientModel(max_iter=100)
     for patient_id in dataset.patients:
-        for tissue_name in patient.tissues:
+        for tissue_name in patient.tissue_names:
             removed_rep = dataset.removeValue(patient_id, tissue_name)
 
             model = PatientModel()
@@ -33,7 +34,10 @@ def LeaveOneOutReconstruction(dataset):
             predicted_rep = model.predict(patient_id, tissue_name)
             residual = removed_rep - predicted_rep
 
-            sum_err += residual.dot(residual.T)[0,0]
+            err = residual.dot(residual.T)[0,0]
+            sum_err += err
+            print 'error reconstructing %s,%s: %f' % (patient_id, tissue_name, err)
+            print 'random (roughly): %f' % (avg_err)
 
             dataset.addValue(patient_id, tissue_name, removed_rep)
 
