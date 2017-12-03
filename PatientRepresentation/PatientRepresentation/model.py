@@ -271,10 +271,12 @@ class PatientModel(object):
         self._weight_mults[(patient_id, tissue_name)] = mult
 
     def getPatientWeight(self, patient_id):
-        return float(n_sample) / float(self._weight_inertia + self.patients[patient_id].num_tissues)
+        n_sample = self.patients[patient_id].num_tissues
+        return float(n_sample) / float(self._weight_inertia + n_sample)
     
     def getTissueWeight(self, tissue_name):
-        return float(n_sample) / float(self._weight_inertia + self.tissues[tissue_name].num_patients)
+        n_sample = self.tissues[tissue_name].num_patients
+        return float(n_sample) / float(self._weight_inertia + n_sample)
 
     def getSampleWeight(self, patient_id, tissue_name):
         key = (patient_id, tissue_name)
