@@ -33,6 +33,7 @@ class PatientModel(object):
                                 for name in dataset.tissues}
         self.getTissueValues(dataset)
         self.getPatientValues(dataset)
+        self.dataset = dataset
 
         for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
@@ -271,11 +272,11 @@ class PatientModel(object):
         self._weight_mults[(patient_id, tissue_name)] = mult
 
     def getPatientWeight(self, patient_id):
-        n_sample = self.patients[patient_id].num_tissues
+        n_sample = self.dataset.patients[patient_id].num_tissues
         return float(n_sample) / float(self._weight_inertia + n_sample)
     
     def getTissueWeight(self, tissue_name):
-        n_sample = self.tissues[tissue_name].num_patients
+        n_sample = self.dataset.tissues[tissue_name].num_patients
         return float(n_sample) / float(self._weight_inertia + n_sample)
 
     def getSampleWeight(self, patient_id, tissue_name):
