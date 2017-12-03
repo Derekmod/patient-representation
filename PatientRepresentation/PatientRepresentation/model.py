@@ -146,7 +146,7 @@ class PatientModel(object):
                     sum_err += residual.T.dot(residual)[0,0] * weight
                 print 'loss before change: %f' % sum_err
                 dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
-                print 'loss before change: %f' % dif.dot(dif.T)[0,0]
+                print 'loss2 before change: %f' % dif.dot(dif.T)[0,0]
             self.patient_reps[patient_id] = total_residual.dot(pinv)
             if verbose:
                 sum_err = 0.
@@ -159,20 +159,7 @@ class PatientModel(object):
                     sum_err += residual.T.dot(residual)[0,0] * weight
                 print 'loss after change: %f' % sum_err
                 dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
-                print 'loss before change: %f' % dif.dot(dif.T)[0,0]
-            self.patient_reps[patient_id] = total_residual.dot(total_transform.T).dot(np.linalg.inv(total_transform.dot(total_transform.T)))
-            if verbose:
-                sum_err = 0.
-                for tissue_name in patient.tissue_names:
-                    tissue = dataset.tissues[tissue_name]
-                    rep = dataset.getValue(patient_id, tissue_name)
-                    residual = self.predict(patient_id, tissue_name) - rep
-                    weight = 1.
-
-                    sum_err += residual.T.dot(residual)[0,0] * weight
-                print 'loss after change: %f' % sum_err
-                dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
-                print 'loss before change: %f' % dif.dot(dif.T)[0,0]
+                print 'loss2 after change: %f' % dif.dot(dif.T)[0,0]
 
     def train_centers(self, dataset):
         for tissue_name in dataset.tissues:
