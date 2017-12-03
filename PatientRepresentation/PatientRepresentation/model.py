@@ -65,7 +65,8 @@ class PatientModel(object):
     def getTissueValues(self, dataset):
         self._tissue_values = dict()
         for tissue in dataset.tissues.values():
-            value_list = [tissue.getValue(patient_id) for patient_id in tissue.patient_ids]
+            value_list = [tissue.getValue(patient_id) * self.getPatientWeight(patient_id)
+                          for patient_id in tissue.patient_ids]
             self._tissue_values[tissue.name] = np.concatenate(value_list)
 
     def getPatientValues(self, dataset):
@@ -111,7 +112,7 @@ class PatientModel(object):
             #    rep = np.concatenate([np.array([[1]]), rep], axis=1)
             #    #rep *= self.getSampleWeight(patient_id, tissue_name)
             #    rep_list[tissue.rows[patient_id]] = rep
-            pat_reps = np.concatenate([self._patient_reps[patient_id]
+            pat_reps = np.concatenate([self._patient_reps[patient_id] * self.getPatientWeight(patient_id)
                                        for patient_id in tissue.patient_ids])
             pat_reps = np.concatenate((np.ones((tissue.num_patients,1)), pat_reps), axis=1)
 
@@ -128,8 +129,8 @@ class PatientModel(object):
             transforms = []
 
             for tissue_name in patient.tissue_names:
-                residuals.append(patient.getValue(tissue_name) - self.tissue_centers[tissue_name])
-                transforms.append(self.tissue_transforms[tissue_name])
+                residuals.append((patient.getValue(tissue_name) - self.tissue_centers[tissue_name]) * self.getTissueWeight(tissue_name))
+                transforms.append(self.tissue_transforms[tissue_name] * self.getTissueWeight(tissue_name))
 
             total_residual = np.concatenate(residuals, axis=1)
             total_transform = np.concatenate(transforms, axis=1)
@@ -161,17 +162,17 @@ class PatientModel(object):
                 dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
                 print 'loss2 after change: %f' % dif.dot(dif.T)[0,0]
 
-    def train_centers(self, dataset):
-        for tissue_name in dataset.tissues:
-            tissue = dataset.tissues[tissue_name]
-            transform = self.tissue_transforms[tissue_name]
+    #def train_centers(self, dataset):
+    #    for tissue_name in dataset.tissues:
+    #        tissue = dataset.tissues[tissue_name]
+    #        transform = self.tissue_transforms[tissue_name]
 
-            sum_residual = -np.sum(self._tissue_values[tissue_name], axis=0).reshape(1, tissue.dimension)
+    #        sum_residual = -np.sum(self._tissue_values[tissue_name], axis=0).reshape(1, tissue.dimension)
 
-            for patient_id in tissue.patient_ids:
-                sum_residual += self.patient_reps[patient_id].dot(transform)
+    #        for patient_id in tissue.patient_ids:
+    #            sum_residual += self.patient_reps[patient_id].dot(transform)
 
-            self.tissue_centers[tissue_name] = -sum_residual/tissue.num_patients
+    #        self.tissue_centers[tissue_name] = -sum_residual/tissue.num_patients
 
     def normalize(self):
         # normalize mean

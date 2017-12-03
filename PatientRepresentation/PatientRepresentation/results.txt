@@ -1,0 +1,4 @@
+LOOR without weighting
+dimension	LOOR error				ZERO error			%explained
+4			12.799676 +/- 0.354050	15.306914 +/- ?		16.37977 +/- 2.31300705
+5			12.291524 +/- 0.389686	15.158510 +/- ?		18.91337 +/- 2.57074079
