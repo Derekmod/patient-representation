@@ -143,7 +143,7 @@ class PatientModel(object):
                     residual = self.predict(patient_id, tissue_name) - rep
                     weight = 1.
 
-                    sum_err += residual.T.dot(residual)[0,0] * weight
+                    sum_err += residual.dot(residual.T)[0,0] * weight
                 print 'loss before change: %f' % sum_err
                 dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
                 print 'loss2 before change: %f' % dif.dot(dif.T)[0,0]
@@ -156,7 +156,7 @@ class PatientModel(object):
                     residual = self.predict(patient_id, tissue_name) - rep
                     weight = 1.
 
-                    sum_err += residual.T.dot(residual)[0,0] * weight
+                    sum_err += residual.dot(residual.T)[0,0] * weight
                 print 'loss after change: %f' % sum_err
                 dif = total_residual - self.patient_reps[patient_id].dot(total_transform)
                 print 'loss2 after change: %f' % dif.dot(dif.T)[0,0]
@@ -215,7 +215,7 @@ class PatientModel(object):
                     pass
 
                 total_var += rep.T.dot(rep)[0,0] * weight
-                remaining_var += residual.T.dot(residual)[0,0] * weight
+                remaining_var += residual.dot(residual.T)[0,0] * weight
 
         return remaining_var/total_var
 
