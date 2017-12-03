@@ -46,12 +46,12 @@ class PatientModel(object):
         for ep in range(self._max_iter):
             #self.train_transforms(dataset)
             self.trainTransforms(dataset)
-            print 'after transform: %f' % self.errorFrac(dataset)
+            #print 'after transform: %f' % self.errorFrac(dataset)
             self.trainPatients(dataset, pat_verbose)
             #self.train_centers(dataset)
-            print 'after patients: %f' % self.errorFrac(dataset)
+            #print 'after patients: %f' % self.errorFrac(dataset)
             error = self.errorFrac(dataset)
-            #print error
+            print error
             if error > prev_error:
                 pat_verbose=True
                 pass
