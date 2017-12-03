@@ -146,6 +146,7 @@ class PatientModel(object):
                     sum_err += residual.T.dot(residual)[0,0] * weight
                 print 'loss before change: %f' % sum_err
             self.patient_reps[patient_id] = total_residual.dot(pinv)
+            self.patient_reps[patient_id] = total_residual.dot(total_transform.T).dot(np.linalg.inv(total_transform.dot(total_transform.T)))
             if verbose:
                 sum_err = 0.
                 for tissue_name in patient.tissue_names:
