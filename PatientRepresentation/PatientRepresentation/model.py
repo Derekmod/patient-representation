@@ -27,13 +27,13 @@ class PatientModel(object):
         self._nsamples = dict()
 
     def fit(self, dataset):
+        self.dataset = dataset
         self._patient_samples = {id:len(dataset.patients[id].tissue_names) 
                                  for id in dataset.patients}
         self._tissue_samples = {name:len(dataset.tissues[name].patient_ids)
                                 for name in dataset.tissues}
         self.getTissueValues(dataset)
         self.getPatientValues(dataset)
-        self.dataset = dataset
 
         for patient_id in dataset.patients:
             self._patient_reps[patient_id] = np.random.randn(1, self.dimension)
