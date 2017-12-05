@@ -213,8 +213,7 @@ class PatientModel(object):
                 residual = self.predict(patient_id, tissue_name) - rep
                 weight = 1.
                 if weighted:
-                    #weight = self.getSampleWeight(patient_id, tissue_name)
-                    pass
+                    weight = self.getSampleWeight(patient_id, tissue_name)
 
                 total_var += rep.T.dot(rep)[0,0] * weight
                 remaining_var += residual.dot(residual.T)[0,0] * weight
