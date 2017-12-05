@@ -280,8 +280,9 @@ class PatientModel(object):
         return float(n_sample) / float(self._weight_inertia + n_sample)
 
     def getSampleWeight(self, patient_id, tissue_name):
-        key = (patient_id, tissue_name)
-        mult = 1.
-        if key in self._weight_mults:
-            mult = self._weight_mults[key]
-        return self.getWeight(patient_id) * mult
+        #key = (patient_id, tissue_name)
+        #mult = 1.
+        #if key in self._weight_mults:
+        #    mult = self._weight_mults[key]
+        #return self.getWeight(patient_id) * mult
+        return self.getPatientWeight(patient_id) * self.getTissueWeight(tissue_name)

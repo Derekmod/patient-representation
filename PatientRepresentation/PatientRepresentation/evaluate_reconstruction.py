@@ -32,6 +32,11 @@ def LeaveOneOutReconstruction(dataset):
     sum_err = 0.
     sum_err2 = 0.
     sum_var = 0.
+
+    weighted_sum_err = 0.
+    weighted_sum_err2 = 0.
+    sum_weight = 0.
+    max_weight = 0.
     for sample_no, (tissue_name, patient_id) in enumerate(samples):
         removed_rep = dataset.removeValue(patient_id, tissue_name)
         rep_var = removed_rep.dot(removed_rep.T)[0,0]
@@ -51,6 +56,17 @@ def LeaveOneOutReconstruction(dataset):
         sum_err2 += err*err
         print 'error reconstructing %s,%s: %f' % (patient_id, tissue_name, err)
         print 'zero-estimate: %f' % (rep_var)
+
+        weight = rep_var
+        weighted_sum_err += weight * err
+        weighted_sum_err2 += weight * err * err
+        sum_weight += weight
+        max_weight = max(max_weight, weight)
+        if sum_weight > max_weight:
+            weighted_mean = weighted_sum_err / sum_weight
+            weighted_var = (weighted_sum_err2 / sum_weight) - (weighted_sum_err / sum_weight)**2
+            unbiased_scale = max_weight / (sum_weight - max_weight)
+            print 'var explained: %f +/- %f%%' % (1 - weighted_mean, weighted_var * unbiased_scale)
         
         if sample_no > 0:
             mean_err = sum_err/(sample_no+1)

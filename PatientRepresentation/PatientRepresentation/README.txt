@@ -15,8 +15,3 @@ Visualize PCA, color by age, sex, DTHHRDY
 correlation of each covariate for each dimension of patient representation
 
 Add Alexis to Github
-
-
---------- LOW PRIORITY
-
-figure out why training loses progress
