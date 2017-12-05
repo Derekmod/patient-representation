@@ -58,10 +58,13 @@ def LeaveOneOutReconstruction(dataset):
         print 'zero-estimate: %f' % (rep_var)
 
         weight = rep_var
-        weighted_sum_err += weight * err
-        weighted_sum_err2 += weight * err * err
+        val = err/rep_var
+
+        weighted_sum_err += weight * val
+        weighted_sum_err2 += weight * val**2
         sum_weight += weight
         max_weight = max(max_weight, weight)
+
         if sum_weight > max_weight:
             weighted_mean = weighted_sum_err / sum_weight
             weighted_var = (weighted_sum_err2 / sum_weight) - (weighted_sum_err / sum_weight)**2
