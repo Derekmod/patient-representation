@@ -66,7 +66,9 @@ def LeaveOneOutReconstruction(dataset):
             weighted_mean = weighted_sum_err / sum_weight
             weighted_var = (weighted_sum_err2 / sum_weight) - (weighted_sum_err / sum_weight)**2
             unbiased_scale = max_weight / (sum_weight - max_weight)
-            print 'var explained: %f +/- %f%%' % (1 - weighted_mean, weighted_var * unbiased_scale)
+            estimation_var = weighted_var * unbiased_scale
+            estimation_std = estimation_var ** 0.5
+            print 'var explained: %f +/- %f%%' % (1 - weighted_mean, estimation_std)
         
         if sample_no > 0:
             mean_err = sum_err/(sample_no+1)
