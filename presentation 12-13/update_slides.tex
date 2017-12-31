@@ -1,0 +1,193 @@
+\documentclass{beamer}
+
+%\documentclass[pdflatex,mathserif,sansserif,aspectratio=43]{beamer}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{bbm}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\DeclareMathOperator*{\argmin}{arg\!\min}
+\DeclareMathOperator*{\argmax}{arg\!\max}
+
+\newcommand{\ul}[0]{\underline}
+\newcommand{\hs}[1]{\hspace*{#1 cm}}
+\newcommand{\ind}[0]{\indent}
+\newcommand{\tx}[1]{\text{#1}}
+
+
+\title{Linear Relations between Gene Expression in Several Tissues}
+\author{Derek Modzelewski and Ben Pikus}
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Changes to Model}
+\begin{itemize}
+	\item Added tissue centers
+	\item
+	\item Normalize patient representations
+	\item	
+	\item Weight samples
+	\item
+	\item Adaptive PCA
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Adding Tissue Centers: Notation, Model}
+Notation:
+\begin{align*}
+Y_{iu} &:= \tx{Gene Expression for patient $u$ in tissue $i$} \\
+S_u &:= \tx{Euclidean vector representation of patient $u$} \\
+h &:= \tx{Dimensionality of patient representations} \\
+d &:= \tx{Dimensionality of expression representations} \\
+F_i &:= \tx{Linear transform ($\mathbb{R}^{d \times h}$) associated with tissue $i$} \\
+c_i &:= \tx{Tissue center}
+\end{align*}
+Model:
+\[ Y_{iu} = F_i S_u + c_i + \mathcal{N}(0, \sigma^2) \]
+\end{frame}
+
+\begin{frame}
+\frametitle{Adding Tissue Centers: Reframed Model}
+Notation:
+\begin{align*}
+S_u^* &:= {1 \choose S_u} \\
+F_i* &:= \Big(c_i \hs{.25} F_i\Big) \\
+\end{align*}
+Model:
+\[ Y_{iu} = F_i^* S_u^* + \mathcal{N}(0, \sigma^2) \]
+\end{frame}
+
+\begin{frame} \frametitle{Adding Tissue Centers: New Algorithm}
+Given either $F_i^*$ or $S_u^*$, becomes least-squares linear regression. \\
+For solving for $F$ and $c$, we use:
+\[ Y_{iu} = F_i^* S_u^* + \mathcal{N}(0, \sigma^2) \]
+For solving for $S$, we use:
+\[ Y_{iu} = F_i S_u + c_i + \mathcal{N}(0, \sigma^2) \]
+
+Alternate: \\
+\hs{1} set $F_i^* \leftarrow Y_i S_{(i)}^{*T}\Big(S_{(i)}^*S_{(i)}^{*T}\Big)^{-1} \hs{2.8}\forall i$ \\
+\hs{1} set $S_u \leftarrow \Big(F_{(u)}^TF_{(u)}\Big)^{-1}F_{(u)}^T (Y_{iu} - c_i) \hs{1.6}\forall u$
+\end{frame}
+
+\begin{frame} \frametitle{Normalizing Patient Representations: Centering}
+Let $\bar{S} = |S|^{-1}\sum_{u} S_u \hs{.5}$ Note that $S-\bar{S}$ has mean $\mathbf{0}$\\
+Recall our model:
+\begin{align*}
+Y_{iu} &= F_i S_u + c_i + \mathcal{N}(0, \sigma^2)
+\\&= F_i (S_u - \bar{S}) + (F_i \bar{S} + c_i) + \mathcal{N}(0, \sigma^2)
+\\&= F_i S_u' + c_i' + \mathcal{N}(0, \sigma^2)
+\end{align*}
+where
+\begin{align*}
+S_u' &:= (S_u - \bar{S}) \\
+c_i' &:= (F_i\bar{S} + c_i)
+\end{align*}
+\end{frame}
+
+\begin{frame} \frametitle{Normalizing Patient Representations: Normalizing Variance}
+Let $E$ be a matrix {\it s.t.} $ES$ has identity covariance matrix. \\
+Recall our model:
+\begin{align*}
+Y_{iu} &= F_i S_u + c_i + \mathcal{N}(0, \sigma^2)
+\\&= F_i E^{-1} E S_u + c_i + \mathcal{N}(0, \sigma^2)
+\\&= F_i'S_u' + c_i + \mathcal{N}(0, \sigma^2)
+\end{align*}
+where
+\begin{align*}
+S_u' &:= ES_u \\
+F_i' &:= F_iE^{-1}
+\end{align*}
+\end{frame}
+
+\begin{frame} \frametitle{Weighting Samples}
+
+{\bf Intuition}: Some tissues have very few samples, and so we are uncertain of their tissue transforms (the $F$ matrix). When estimating a patient's representation, we should not value these tissues as much since they are noisier sources of information.
+
+{\bf Assumptions}: Each tissue has its own persistent noise (bias), and its own variance when estimating a patient's representation. The variance is inversely proportional to the number of samples in that tissue.
+
+\[ \Rightarrow w_i \propto \frac{n_i}{\lambda + n_i} \]
+where $n_i$ is the number of samples in tissue $i$. In total, we use:
+\[ w_{iu} = \big(\frac{n_i}{\lambda_t+n_i}\big)\big(\frac{n_u}{\lambda_p+n_u}\big) \]
+Note that this weight tends to $1$ as the number of samples in both the tissue and the patient go to $\infty$
+\end{frame}
+
+\begin{frame} \frametitle{Weighting Samples: Model}
+This method of weighting the samples is equivalent to solving the MLE of a related model:
+\[ w_{iu} Y_{iu} = w_{iu}\big(F_i S_u + c_i\big) + \mathcal{N}(0, \sigma^2) \]
+Which, without going into details, has nearly the same training algorithm as the previous models. \\
+In the future, I might train for the $\lambda_t$ and $\lambda_p$ values, but currently they are priors.
+\end{frame}
+
+\begin{frame} \frametitle{Adaptive PCA}
+{\bf Motivation}: We run PCA on each tissue separately. This minimizes the number of parameters estimated when representing tissues, and also aims to maximize how much of the variance of the data is kept. Instead of keeping a set number of PCs for each tissue, I globally choose which set of PCs across {\bf all} tissues capture the most variance. Formally, to maximize:
+\[ \sum_{i}\sum_{u} Y_{iu}^TY_{iu} \]
+Does this overly penalize the tissues with few samples?
+\end{frame}
+
+\begin{frame} \frametitle{Methods and Results}
+\begin{itemize}
+	\item Reconstruction
+	\item
+	\item Subsequent Inference
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Reconstruction: LOOR}
+Issues with reconstructing after throwing out necessary data. \\
+LOOR (mostly) avoids that issue, but takes nearly 3 days to run. \\
+Preliminary results: \\
+\ind $h=4$, $\lambda_t = \lambda_p = 0$: $\%\tx{explained} = 16.37977 \pm 2.31300705$ \\
+\ind $h=5$, $\lambda_t = \lambda_p = 0$: $\%\tx{explained} = 18.91337 \pm 2.57074079$ \\
+\ind $h=5$, $\lambda_t = \lambda_p = 10$: $\%\tx{explained} = 19.46173 \pm 5.497874442$ \\
+\ind $h=4$, $\lambda_t = \lambda_p = 10$: $\%\tx{explained} = 17.613365704  \pm 4$ \\
+\ind $h=7$, $\lambda_t = \lambda_p = 10$: $\%\tx{explained} = 23.43076 \pm 10.78931$ \\ 
+\end{frame}
+
+\begin{frame} \frametitle{Subsequent Inference}
+Ultimately, we wish to use these patient representations to relate patients or to predict features of those patients. When inferring sex, age, and DTHHRDY, we find that logistic classifiers on the patient representations are no better than predicting the most common class in the training set (naive classification). With weighting, we achieve a whole 3\% better than random result. \\
+NOTE: these results are old, in need of update.
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

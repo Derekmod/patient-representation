@@ -6,11 +6,9 @@ dimension	LOOR error				ZERO error			%explained
 LOOR with weighting, dimension=5 (patient and tissue inertia identical)
 inertia		LOOR error				ZERO error			%explained
 10			12.114328 +/- 0.826974	15.041704 +/- ?		19.46173 +/- 5.497874442
-			12.538875 +/- 0.433703	15.219550
+10			12.538875 +/- 0.433703	15.219550 +/- ?		17.613365704 
 
 LOOR
 inertia		dimension	LOOR error				ZERO error			%explained
 10			7			12.335086 +/- 1.738128	16.109716			23.43076 +/- 10.78931
-total LOOR err = 12.335086 +/- 1.738128
-total ZERO err = 16.109716
 

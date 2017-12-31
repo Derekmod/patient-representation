@@ -2,12 +2,24 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# data
 ugrad_dump/
 data/
+
+# Visual Studio
 PatientRepresentation/.vs/
 
 # C extensions
 *.so
+
+# LaTeX extensions
+*.out
+*.synctex.gz
+*.nav
+*.aux
+*.toc
+*.snm
 
 # Distribution / packaging
 .Python
@@ -102,3 +114,4 @@ ENV/
 
 # mypy
 .mypy_cache/
+PatientRepresentation/.vs/PatientRepresentation/v14/.suo

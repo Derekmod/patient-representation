@@ -71,7 +71,7 @@ def LeaveOneOutReconstruction(dataset):
             unbiased_scale = max_weight / (sum_weight - max_weight)
             estimation_var = weighted_var * unbiased_scale
             estimation_std = estimation_var ** 0.5
-            print 'var explained: %f +/- %f%%' % (1 - weighted_mean, estimation_std)
+            print 'var explained: %f +/- %f%%' % (100. * (1. - weighted_mean), 100.*estimation_std)
         
         if sample_no > 0:
             mean_err = sum_err/(sample_no+1)
@@ -82,19 +82,19 @@ def LeaveOneOutReconstruction(dataset):
 
         dataset.addValue(patient_id, tissue_name, removed_rep)
 
-    return sum_err
+    return sum_err, sum_var
 
 
 
 if __name__ == '__main__':
     dataset = getDataset()
-    print LeaveOneOutReconstruction(dataset)
+    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset)
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
 
-    tissue_name = dataset.tissues.keys()[0]
-    tissue = dataset.tissues[tissue_name]
+    #tissue_name = dataset.tissues.keys()[0]
+    #tissue = dataset.tissues[tissue_name]
 
     # print tissue.value[tissue.rows[patient_id],:]
     # print model.predict(patient_id, tissue_name)
