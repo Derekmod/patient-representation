@@ -7,6 +7,32 @@ import patlearn_tools
 import numpy as np
 from sklearn import svm
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="increase output verbosity")
+parser.add_argument("--data_dir", type=str)
+parser.add_argument("-t", "--train", action="store_true")
+parser.add_argument("-f", "--frame", action="store_true")
+parser.add_argument("--output_dir", type=str)
+parser.add_argument("--dimension", type=int)
+parser.add_argument("--inertia", type=float)
+parser.add_argument("--max_iter", type=int)
+#parser.add_argument("--load", type=str, help="file to load weights from")
+#parser.add_argument("--save", help="file to save weights to", type=str)
+#parser.add_argument("--nepochs", type=int, help="max # of epochs for training")
+#parser.add_argument("--data", type=str, help="file to load dataset from")
+args = parser.parse_args()
+if args.dimension is None:
+    args.dimension = 5
+if args.inertia is None:
+    args.inertia = 10.
+if args.max_iter is None:
+    args.max_iter = 50
+
+
+
 
 def getDataset():
     base_dir = os.path.dirname(os.getcwd())
@@ -18,7 +44,7 @@ def getDataset():
     dataset = dataset_m.loadFromDir(data_dir, verbose=True)
     return dataset
 
-def LeaveOneOutReconstruction(dataset):
+def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=10., patient_inertia=10.):
     avg_err = dataset.total_variance / dataset.total_samples
 
     samples = []
@@ -42,7 +68,7 @@ def LeaveOneOutReconstruction(dataset):
         rep_var = removed_rep.dot(removed_rep.T)[0,0]
         sum_var += rep_var
 
-        model = PatientModel(max_iter=50, dimension=7, weight_inertia=10.)
+        model = PatientModel(max_iter=max_iter, dimension=dimension, weight_inertia=tissue_inertia)
         #model.setWeightMult(patient_id, tissue_name, 0.)
         model.fit(dataset)
 
@@ -78,7 +104,6 @@ def LeaveOneOutReconstruction(dataset):
             var_err = (sum_err2 - sum_err*sum_err/(sample_no+1))/(sample_no * (sample_no+1))
             print 'total LOOR err = %f +/- %f' % (mean_err, 2*var_err**.5)
             print 'total ZERO err = %f' % (sum_var / (sample_no+1))
-
 
         dataset.addValue(patient_id, tissue_name, removed_rep)
 
