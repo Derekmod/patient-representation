@@ -113,7 +113,7 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
 
 if __name__ == '__main__':
     dataset = getDataset()
-    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset)
+    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, tissue_inertia=args.inertia, patient_inertia=args.inertia)
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
