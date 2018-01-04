@@ -92,8 +92,8 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
         err = residual.dot(residual.T)[0,0]
         if logstream is not None:
             # scale, err, #patients, #tissues, patient_id, tissue_name
-            logstream.write('%f,%f,%d,%d,%s,%s\n' % (rep_var, err, dataset.tissues[tissue_name].numPatients, dataset.patients[patient_id].numTissues,
-                                               patient_id, tissue_name))
+            logstream.write('%f,%f,%d,%d,%s,%s\n' % (rep_var, err, dataset.tissues[tissue_name].num_patients, 
+                                                     dataset.patients[patient_id].num_tissues, patient_id, tissue_name))
 
         sum_err += err
         sum_err2 += err*err
