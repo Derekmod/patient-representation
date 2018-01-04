@@ -56,7 +56,7 @@ def getDataset():
         dataset.pickle(pickle_filename)
         return dataset
 
-def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=10., patient_inertia=10., logstream=None):
+def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=10., patient_inertia=10., logstream=None, min_samples=2):
     avg_err = dataset.total_variance / dataset.total_samples
 
     samples = []
@@ -76,6 +76,10 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
     sum_weight = 0.
     max_weight = 0.
     for sample_no, (tissue_name, patient_id) in enumerate(samples):
+        if dataset.patients[patient_id].num_tissues < min_samples:
+            continue
+        if dataset.tissues[tissue_name].num_patients < min_samples:
+            continue
         removed_rep = dataset.removeValue(patient_id, tissue_name)
         rep_var = removed_rep.dot(removed_rep.T)[0,0]
         sum_var += rep_var
