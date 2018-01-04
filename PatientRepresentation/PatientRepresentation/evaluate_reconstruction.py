@@ -1,4 +1,5 @@
 import os
+import sys
 
 import dataset as dataset_m
 from model import PatientModel
@@ -13,6 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="increase output verbosity")
 parser.add_argument("--data_dir", type=str)
+parser.add_argument("--pickle_dir", type=str)
 parser.add_argument("-t", "--train", action="store_true")
 parser.add_argument("-f", "--frame", action="store_true")
 parser.add_argument("--output_dir", type=str)
@@ -30,6 +32,8 @@ if args.inertia is None:
     args.inertia = 10.
 if args.max_iter is None:
     args.max_iter = 50
+if args.pickle_dir is None:
+    args.pickle_dir = './pickled/'
 
 
 
@@ -41,10 +45,18 @@ def getDataset():
     data_dir = os.path.join(base_dir, 'data')
     data_dir = os.path.join(data_dir, 'V7 Data')
 
-    dataset = dataset_m.loadFromDir(data_dir, verbose=True)
-    return dataset
+    if not os.path.isdir(args.pickle_dir):
+        os.makedirs(args.pickle_dir)
 
-def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=10., patient_inertia=10.):
+    pickle_filename = os.path.join(args.pickle_dir, 'dataset.pickle')
+    if os.path.exists(pickle_filename):
+        return dataset_m.loadFromPickle(pickle_filename)
+    else:
+        dataset = dataset_m.loadFromDir(data_dir, verbose=True)
+        dataset.pickle(pickle_filename)
+        return dataset
+
+def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=10., patient_inertia=10., logstream=None):
     avg_err = dataset.total_variance / dataset.total_samples
 
     samples = []
@@ -78,6 +90,11 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
             residual = removed_rep - predicted_rep
 
         err = residual.dot(residual.T)[0,0]
+        if logstream is not None:
+            # scale, err, #patients, #tissues, patient_id, tissue_name
+            logstream.write('%f,%f,%d,%d,%s,%s\n' % (rep_var, err, dataset.tissues[tissue_name].numPatients, dataset.patients[patient_id].numTissues,
+                                               patient_id, tissue_name))
+
         sum_err += err
         sum_err2 += err*err
         print 'error reconstructing %s,%s: %f' % (patient_id, tissue_name, err)
@@ -113,7 +130,16 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
 
 if __name__ == '__main__':
     dataset = getDataset()
-    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, tissue_inertia=args.inertia, patient_inertia=args.inertia)
+    # TODO specify logstream
+    logdir = 'results/'
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    logfile = os.path.join(logdir,'i%d-d%d-tin%d-pin%d.csv' % (args.max_iter, args.dimension, int(args.inertia), int(args.inertia)))
+    logstream = open(logfile, 'w')
+    logstream.write('scale,err,#patients,#tissues,patient_id,tissue_name\n')
+    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, 
+                                                                   tissue_inertia=args.inertia, patient_inertia=args.inertia,
+                                                                   logstream=logstream)
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)

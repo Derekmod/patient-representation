@@ -7,6 +7,7 @@ Attributes:
 
 import os
 import copy
+import pickle
 
 import numpy as np
 from sklearn.decomposition import PCA
@@ -50,6 +51,9 @@ class PatientTissueData(object):
 
         self._patients[patient_id].addValue(tissue_name, value)
         self._tissues[tissue_name].addValue(patient_id, value)
+
+    def pickle(self, filename):
+        pickle.dump(self, open(filename, 'wb'))
 
     @property
     def patients(self):
@@ -172,4 +176,7 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4.,
     dataset.tissues[tissue_name]._dimension = val.shape[1]
 
     return var_exp * dataset.tissues[tissue_name].num_patients
+
+def loadFromPickle(filename):
+    return pickle.load(open(filename, 'rb'))
 
