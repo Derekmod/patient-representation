@@ -1,0 +1,9 @@
+scale,err,#patients,#tissues,patient_id,tissue_name
+3.102554,2.303416,117,30,GTEX-13OW8,Brain_Frontal_Cortex_BA9
+6.668323,5.014360,219,22,GTEX-XGQ4,Pancreas
+asts
+12.448856,10.939338,382,27,GTEX-WZTO,Lung
+4.583231,3.843472,110,30,GTEX-13OW8,Brain_Hippocampus
+54.090742,38.192127,490,26,GTEX-13RTJ,Muscle_Skeletal
+21.755450,16.806232,245,24,GTEX-WFON,Colon_Transverse
+8.138369,6.719424,312,37,GTEX-15ER7,Adipose_Visceral_Omentum

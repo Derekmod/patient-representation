@@ -23,6 +23,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="analysis.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="dataset.py">
       <SubType>Code</SubType>
     </Compile>
@@ -39,6 +42,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="patlearn_tools.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_logging.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tissue.py">

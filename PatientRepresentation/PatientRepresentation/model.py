@@ -45,12 +45,8 @@ class PatientModel(object):
         prev_error = 1e16
         pat_verbose=False
         for ep in range(self._max_iter):
-            #self.train_transforms(dataset)
             self.trainTransforms(dataset)
-            #print 'after transform: %f' % self.errorFrac(dataset)
-            self.trainPatients(dataset, pat_verbose)
-            #self.train_centers(dataset)
-            #print 'after patients: %f' % self.errorFrac(dataset)
+            self.trainPatients(dataset)
             error = self.errorFrac(dataset)
             print error
             if error > prev_error:
@@ -215,7 +211,7 @@ class PatientModel(object):
                 if weighted:
                     weight = self.getSampleWeight(patient_id, tissue_name)
 
-                total_var += rep.T.dot(rep)[0,0] * weight
+                total_var += rep.dot(rep.T)[0,0] * weight
                 remaining_var += residual.dot(residual.T)[0,0] * weight
 
         return remaining_var/total_var

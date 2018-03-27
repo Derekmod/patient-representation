@@ -10,17 +10,17 @@ import copy
 import pickle
 
 import numpy as np
-from sklearn.decomposition import PCA
 
 from tissue import Tissue
 from patient import Patient
 
 
 class PatientTissueData(object):
-
     def __init__(self):
         self._tissues = dict()
         self._patients = dict()
+        self._technicals = dict()  # technicals[patient_id][tissue_name] = {label --> val}
+        self._technical_labels = []
 
     def addPatient(self, patient):
         """Adds a Patient to database."""
@@ -55,6 +55,67 @@ class PatientTissueData(object):
     def pickle(self, filename):
         pickle.dump(self, open(filename, 'wb'))
 
+    def addTechnicalsFromFile(self, filename, regress=True):
+        ''' stores data in Tissue object'''
+        f = open(filename)
+        labels = f.readline().strip().split()
+
+        for line in f:
+            items = line.strip().split()
+
+            id = items[0]
+            id_components = items.split('-')
+            patient_id = '-'.join(id_components[:2])
+            tissue_name = items[10]
+            tissue = self._tissues[tissue_name]
+            
+            #if patient_id not in self._technicals:
+            #    self._technicals[patient_id] = dict()
+
+            #if tissue_name not in self._technicals[patient_id]:
+            #    self._technicals[(patient_id, tissue_name)] = dict()
+
+            for i in range(1, len(items)):
+                try:
+                    val = float(items[i])
+                    #technicals[(patient_id, tissue_name)][labels[i]] = val
+                    tissue._technicals[labels[i]][patient_id] = val
+                    if labels[i] not in self._technical_labels:
+                        self._technical_labels += [labels[i]]
+                except:
+                    pass
+
+        for sample_id in self.samples:
+            self._technicals[sample_id] = np.array([technicals[sample_id][label]
+                                                    for label in self._technical_labels])
+
+    def runPCA(self, tissue_name=None):
+        if tissue_name is None:
+            for tn in self._tissues:
+                self._tissues[tn].runPCA()
+        else:
+            self._tissues[tissue_name].runPCA()
+
+    def regressCovariates(self, tissue_name=None, cov_names=None):
+        ''' Remove linear trends of certain covariates.
+        Args:
+            cov_names [str]: names of covariates to regress upon (or None to regress on all)
+        '''
+        if tissue_name is None:
+            for tn in self._tissues:
+                self._tissues[tn].regressCovariates(cov_names)
+        else:
+            self._tissues[tissue_name].regressCovariates(cov_names)
+
+    def split(self, seed=None):
+        ''' Split dataset into train, validate, test.
+        Args:
+            seed: random seed
+        Returns:
+            ?
+        '''
+        pass
+        
     @property
     def patients(self):
         return self._patients
@@ -62,6 +123,12 @@ class PatientTissueData(object):
     @property
     def tissues(self):
         return self._tissues
+
+    @property 
+    def samples(self):
+        for patient_id in self._patients:
+            for tissue_name in self._patients[patient_id].tissues:
+                yield (patient_id, tissue_name)
 
     @property
     def total_samples(self):
@@ -113,65 +180,25 @@ def loadFromDir(directory_name, verbose=False):
     return dataset
     
 
-def loadFromFile(filename, dataset, verbose=False, run_pca=True, explain_rat=4., ret_var=False):
-    # TODO: arg check
+def loadFromFile(filename, dataset, verbose=False, run_pca=False):
+    # FUTURE: arg check
 
     tissue_name = os.path.basename(filename).split('.')[0]
-
     tissue_file = open(filename, 'r')
 
     patient_ids = tissue_file.readline().strip().split('\t')[4:]
-
-    # print 'got patients'
 
     raw_t = [[float(val_str)
               for val_str in line.strip().split('\t')[4:]]
              for line in tissue_file]
 
-    # print 'got data'
-
     val = np.array(raw_t).T
 
-    var_exp = 0.
-    if run_pca:
-        pca_model = PCA(n_components=50, copy=False)
-        pca_model.fit_transform(val)
-        #cov = val.T.dot(val)/(len(raw_t))
-
-        #U, W, _ = np.linalg.svd(cov)
-
-        #cum_var = np.cumsum(W**2)
-        #cum_var = cum_var/cum_var[-1]
-        cum_var = np.cumsum(pca_model.explained_variance_ratio_)
-        explained_ratio = [float(cum_var[i])/float(i+1)
-                           for i in range(len(cum_var))]
-        
-        best_dim = 0
-        for dim in range(len(cum_var)):
-            if explained_ratio[dim]*len(patient_ids) > explain_rat:
-                best_dim = dim
-        n_components = best_dim+1
-        n_components = max(n_components, 8)
-
-        #val = val.dot(U[:,:n_components])
-        val = val[:,:n_components]
-        var_exp = cum_var[n_components-1]
-        
-        if verbose:
-            print tissue_name + ' has {} components to explain {}% variance for {} patients'.format(n_components, 100.*var_exp, len(patient_ids))
-
-    elif verbose:
+    if verbose:
         print tissue_name + ' parsed'
-        
-    #for patient_id in patient_ids:
-    #    if patient_id not in dataset.patients:
-    #        patient = Patient(patient_id)
-    #        dataset.addPatient(patient)
 
     for row, patient_id in enumerate(patient_ids):
         dataset.addValue(patient_id, tissue_name, val[row:row+1,:])
-        #tissue.addValue(patient_id, val[row:row+1,:])
-        #dataset.patients[patient_id].addValue(tissue_name, val[row:row+1,:])
 
     dataset.tissues[tissue_name]._dimension = val.shape[1]
 

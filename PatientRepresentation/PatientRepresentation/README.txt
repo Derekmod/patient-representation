@@ -16,12 +16,6 @@ correlation of each covariate for each dimension of patient representation
 
 Add Alexis to Github
 
-active screens:
-d5i0
-d5i4
-d5i2
-d6i2
-d7i2
-d8i2
-d8i0
-d8i4
+
+rework loading technicals
+restructure loading dataset

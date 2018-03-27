@@ -1,5 +1,6 @@
 import os
 import sys
+import collapse_logging as logging
 
 import dataset as dataset_m
 from model import PatientModel
@@ -21,6 +22,8 @@ parser.add_argument("--output_dir", type=str)
 parser.add_argument("--dimension", type=int)
 parser.add_argument("--inertia", type=float)
 parser.add_argument("--max_iter", type=int)
+parser.add_argument("--technical", type=str)
+parser.add_argument("--covariates", type=str)
 #parser.add_argument("--load", type=str, help="file to load weights from")
 #parser.add_argument("--save", help="file to save weights to", type=str)
 #parser.add_argument("--nepochs", type=int, help="max # of epochs for training")
@@ -52,7 +55,9 @@ def getDataset():
     if os.path.exists(pickle_filename):
         return dataset_m.loadFromPickle(pickle_filename)
     else:
-        dataset = dataset_m.loadFromDir(data_dir, verbose=True)
+        dataset = dataset_m.loadFromDir(data_dir, verbose=True, run_pca=False)
+        dataset.addTechnicalsFromFile('', regress=True) # TODO: find filename
+        dataset.runPCA()
         dataset.pickle(pickle_filename)
         return dataset
 
@@ -64,6 +69,7 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
         for patient_id in tissue.patient_ids:
             samples += [(tissue.name, patient_id)]
     samples = np.random.permutation(samples)
+    progress = logging.logProgress('LOOR progress', len(samples))
     print 'will need to go through %d tests:' % len(samples)
 
     # model = PatientModel(max_iter=100)
@@ -86,7 +92,7 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
 
         model = PatientModel(max_iter=max_iter, dimension=dimension, weight_inertia=tissue_inertia)
         #model.setWeightMult(patient_id, tissue_name, 0.)
-        model.fit(dataset)
+        model.fit(dataset, verbose=False)
 
         predicted_rep = model.predict(patient_id, tissue_name)
         residual = removed_rep
@@ -128,23 +134,37 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
             print 'total ZERO err = %f' % (sum_var / (sample_no+1))
 
         dataset.addValue(patient_id, tissue_name, removed_rep)
+        progress.step()
 
     return sum_err, sum_var
 
 
 
 if __name__ == '__main__':
+    logging.addNode('loading technical covariates')
+
+    logging.closeNode()
+
+    logging.addNode('loading dataset')
     dataset = getDataset()
+    dataset.addTechnicalsFromFile(args.technical)
+    dataset.regressTechnicals()
+    logging.closeNode()
     # TODO specify logstream
+
+    logging.addNode('initilizing logfile')
     logdir = 'results/'
     if not os.path.exists(logdir):
         os.makedirs(logdir)
     logfile = os.path.join(logdir,'i%d-d%d-tin%d-pin%d.csv' % (args.max_iter, args.dimension, int(args.inertia), int(args.inertia)))
     logstream = open(logfile, 'w')
     logstream.write('scale,err,#patients,#tissues,patient_id,tissue_name\n')
+    logging.closeNode()
+    logging.addNode('running LOOR')
     print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, 
                                                                    tissue_inertia=args.inertia, patient_inertia=args.inertia,
                                                                    logstream=logstream)
+    logging.exit()
 
     model = PatientModel(max_iter=100)
     model.fit(dataset)
