@@ -23,9 +23,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="analysis.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="dataset.py">
       <SubType>Code</SubType>
     </Compile>
@@ -55,6 +52,7 @@
     <Content Include="README.txt" />
     <Content Include="requirements.txt" />
     <Content Include="results.txt" />
+    <Content Include="run_eval.sh" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -8,6 +8,7 @@ Attributes:
 import os
 import copy
 import pickle
+import collapse_logging as logging
 
 import numpy as np
 
@@ -64,7 +65,7 @@ class PatientTissueData(object):
             items = line.strip().split()
 
             id = items[0]
-            id_components = items.split('-')
+            id_components = id.split('-')
             patient_id = '-'.join(id_components[:2])
             tissue_name = items[10]
             tissue = self._tissues[tissue_name]
@@ -96,14 +97,20 @@ class PatientTissueData(object):
         else:
             self._tissues[tissue_name].runPCA()
 
-    def regressCovariates(self, tissue_name=None, cov_names=None):
+    def regressCovariates(self, tissue_name=None, cov_names=None, verbose=True):
         ''' Remove linear trends of certain covariates.
         Args:
             cov_names [str]: names of covariates to regress upon (or None to regress on all)
         '''
         if tissue_name is None:
+            if verbose:
+                progress = logging.logProgress('REGRESSING COVARIATES', len(self._tissues))
             for tn in self._tissues:
+                if verbose:
+                    statement = logging.log('regressing on tissue: ' + tn)
                 self._tissues[tn].regressCovariates(cov_names)
+                statement.delete()
+                progress.step()
         else:
             self._tissues[tissue_name].regressCovariates(cov_names)
 
@@ -152,30 +159,18 @@ def loadFromDir(directory_name, verbose=False):
         directory_name <string>: path to folder (absolute or relative)
         verbose <bool>: whether to output logging info
     Returns:
-        a Dataset object with PCA applied.
     """
     dataset = PatientTissueData()
 
     filenames = os.listdir(directory_name)
-
-    total_var = 0.
-    kept_var = 0.
-    kept_dimensions = 0
+    load_progress = logging.logProgress('LOADING FILES', len(filenames))
     for filename in filenames:
         if verbose:
-            print 'reading from ' + filename
-        kept_var = loadFromFile(os.path.join(directory_name, filename), dataset, 
-                               verbose=verbose, explain_rat=10., ret_var=True)
-
-    for tissue in dataset.tissues.values():
-        #kept_var += var_exp * tissue.num_patients
-        kept_dimensions += tissue.dimension
-        total_var += tissue.num_patients
-
-    if verbose:
-        print 'total var explained: {}%'.format(100.*kept_var/total_var)
-        print 'with total dimension: {}'.format(kept_dimensions)
-        print 'in #tissues: {}'.format(len(dataset.tissues))
+            logging.log('reading from ' + filename)
+        loadFromFile(os.path.join(directory_name, filename), dataset, 
+                               verbose=verbose)
+        load_progress.step()
+    logging.closeNode()
 
     return dataset
     
@@ -194,15 +189,12 @@ def loadFromFile(filename, dataset, verbose=False, run_pca=False):
 
     val = np.array(raw_t).T
 
-    if verbose:
-        print tissue_name + ' parsed'
-
     for row, patient_id in enumerate(patient_ids):
         dataset.addValue(patient_id, tissue_name, val[row:row+1,:])
 
     dataset.tissues[tissue_name]._dimension = val.shape[1]
 
-    return var_exp * dataset.tissues[tissue_name].num_patients
+    return tissue_name
 
 def loadFromPickle(filename):
     return pickle.load(open(filename, 'rb'))

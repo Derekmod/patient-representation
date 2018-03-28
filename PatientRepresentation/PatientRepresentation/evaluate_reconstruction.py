@@ -14,15 +14,14 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="increase output verbosity")
-parser.add_argument("--data_dir", type=str)
-parser.add_argument("--pickle_dir", type=str)
+parser.add_argument("--data-dir", type=str)
+parser.add_argument("--pickle-dir", type=str)
 parser.add_argument("-t", "--train", action="store_true")
-parser.add_argument("-f", "--frame", action="store_true")
-parser.add_argument("--output_dir", type=str)
+parser.add_argument("--output-dir", type=str)
 parser.add_argument("--dimension", type=int)
 parser.add_argument("--inertia", type=float)
-parser.add_argument("--max_iter", type=int)
-parser.add_argument("--technical", type=str)
+parser.add_argument("--max-iter", type=int)
+parser.add_argument("--technicals", type=str)
 parser.add_argument("--covariates", type=str)
 #parser.add_argument("--load", type=str, help="file to load weights from")
 #parser.add_argument("--save", help="file to save weights to", type=str)
@@ -37,16 +36,22 @@ if args.max_iter is None:
     args.max_iter = 50
 if args.pickle_dir is None:
     args.pickle_dir = './pickled/'
-
-
+if args.data_dir:
+    args.data_dir = args.data_dir.strip()
+if args.technicals:
+    args.technicals = args.technicals.strip()
+if args.covariates:
+    args.covariates = args.covariates.strip()
 
 
 def getDataset():
     base_dir = os.path.dirname(os.getcwd())
     base_dir = os.path.dirname(base_dir)
 
-    data_dir = os.path.join(base_dir, 'data')
-    data_dir = os.path.join(data_dir, 'V7 Data')
+    data_dir = args.data_dir
+    if not args.data_dir:
+        data_dir = os.path.join(base_dir, 'data')
+        data_dir = os.path.join(data_dir, 'V7 Data')
 
     if not os.path.isdir(args.pickle_dir):
         os.makedirs(args.pickle_dir)
@@ -55,8 +60,9 @@ def getDataset():
     if os.path.exists(pickle_filename):
         return dataset_m.loadFromPickle(pickle_filename)
     else:
-        dataset = dataset_m.loadFromDir(data_dir, verbose=True, run_pca=False)
-        dataset.addTechnicalsFromFile('', regress=True) # TODO: find filename
+        dataset = dataset_m.loadFromDir(data_dir, verbose=True)
+        logging.log('adding technicals')
+        dataset.addTechnicalsFromFile(args.technicals, regress=True)
         dataset.runPCA()
         dataset.pickle(pickle_filename)
         return dataset
@@ -139,16 +145,11 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
     return sum_err, sum_var
 
 
-
 if __name__ == '__main__':
-    logging.addNode('loading technical covariates')
-
-    logging.closeNode()
-
     logging.addNode('loading dataset')
     dataset = getDataset()
-    dataset.addTechnicalsFromFile(args.technical)
-    dataset.regressTechnicals()
+    #dataset.addTechnicalsFromFile(args.technical)
+    #dataset.regressTechnicals()
     logging.closeNode()
     # TODO specify logstream
 

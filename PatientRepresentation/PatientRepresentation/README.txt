@@ -1,5 +1,11 @@
 
 
+Loading dataset flow:
+	load all raw values
+	load all technical covariates INTO TISSUES
+	regress out technical covariates BY TISSUE
+	run pca BY TISSUE
+
 
 --------- FUTURE
 
