@@ -10,10 +10,12 @@ Attributes:
 
 import numpy as np
 
+import collapse_logging as logging
+
 
 class PatientModel(object):
 
-    def __init__(self, dimension=8, max_iter=100, weight_inertia=5.):
+    def __init__(self, dimension=8, max_iter=100, tissue_inertia=5., patient_inertia=5., lam=2., tol=1e-5):
         self._patient_reps = dict()
         self._tissue_centers = dict()
         self._tissue_transforms = dict()
@@ -22,7 +24,11 @@ class PatientModel(object):
 
         self._dimension = dimension
         self._max_iter = max_iter
-        self._weight_inertia = weight_inertia
+        #self._weight_inertia = weight_inertia
+        self._tissue_inertia = tissue_inertia
+        self._patient_inertia = patient_inertia
+        self._lam = lam
+        self._tol = tol
 
         self._nsamples = dict()
 
@@ -44,18 +50,18 @@ class PatientModel(object):
             
         prev_error = 1e16
         pat_verbose=False
+        train_progress = logging.addNode('Training', count=self._max_iter)
         for ep in range(self._max_iter):
             self.trainTransforms(dataset)
             self.trainPatients(dataset)
             error = self.errorFrac(dataset)
-            print error
-            if error > prev_error:
-                pat_verbose=True
-                pass
-                self.normalize()
-                print 'normalizing'
+            logging.log(error)
+            if prev_error - error < self._tol:
+                break
             prev_error = error
             # self.normalize()
+            train_progress.step()
+        logging.closeNode()
 
         self.normalize()
 
@@ -113,7 +119,10 @@ class PatientModel(object):
                                        for patient_id in tissue.patient_ids])
             pat_reps = np.concatenate((np.ones((tissue.num_patients,1)), pat_reps), axis=1)
 
-            extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
+            height, width = pat_reps.shape
+            pinv = np.linalg.inv(pat_reps.T.dot(pat_reps) + self._lam * np.eye(width)).dot(pat_reps.T)
+            #extended_transform = np.linalg.pinv(pat_reps).dot(expressions)
+            extended_transform = pinv.dot(expressions)
             self.tissue_centers[tissue_name] = extended_transform[:1,:]
             self.tissue_transforms[tissue_name] = extended_transform[1:,:]
 
@@ -132,7 +141,10 @@ class PatientModel(object):
             total_residual = np.concatenate(residuals, axis=1)
             total_transform = np.concatenate(transforms, axis=1)
 
-            pinv = np.linalg.pinv(total_transform)
+            height, width = total_transform.shape
+
+            #pinv = np.linalg.pinv(total_transform)
+            pinv = total_transform.T.dot(np.linalg.inv(total_transform.dot(total_transform.T) + self._lam * np.eye(height, height)))
             if verbose:
                 sum_err = 0.
                 for tissue_name in patient.tissue_names:
@@ -268,11 +280,11 @@ class PatientModel(object):
 
     def getPatientWeight(self, patient_id):
         n_sample = self.dataset.patients[patient_id].num_tissues
-        return float(n_sample) / float(self._weight_inertia + n_sample)
+        return float(n_sample) / float(self._patient_inertia + n_sample)
     
     def getTissueWeight(self, tissue_name):
         n_sample = self.dataset.tissues[tissue_name].num_patients
-        return float(n_sample) / float(self._weight_inertia + n_sample)
+        return float(n_sample) / float(self._tissue_inertia + n_sample)
 
     def getSampleWeight(self, patient_id, tissue_name):
         #key = (patient_id, tissue_name)

@@ -23,6 +23,8 @@ parser.add_argument("--inertia", type=float)
 parser.add_argument("--max-iter", type=int)
 parser.add_argument("--technicals", type=str)
 parser.add_argument("--covariates", type=str)
+parser.add_argument("--logfile", type=str)
+parser.add_argument("--split-seed", type=int)
 #parser.add_argument("--load", type=str, help="file to load weights from")
 #parser.add_argument("--save", help="file to save weights to", type=str)
 #parser.add_argument("--nepochs", type=int, help="max # of epochs for training")
@@ -42,6 +44,8 @@ if args.technicals:
     args.technicals = args.technicals.strip()
 if args.covariates:
     args.covariates = args.covariates.strip()
+if args.split_seed is None:
+    args.split_seed = 5318008
 
 
 def getDataset():
@@ -61,9 +65,21 @@ def getDataset():
         return dataset_m.loadFromPickle(pickle_filename)
     else:
         dataset = dataset_m.loadFromDir(data_dir, verbose=True)
-        logging.log('adding technicals')
-        dataset.addTechnicalsFromFile(args.technicals, regress=True)
-        dataset.runPCA()
+        logging.log('after data: ' + dataset.summary)
+
+        dataset.normalize(verbose=True)
+        logging.log('after normalize: ' + dataset.summary)
+
+        technical_labels = dataset.addTechnicalsFromFile(args.technicals, regress=False, verbose=True)
+        covariate_labels = dataset.addCovariatesFromFile(args.covariates, verbose=True)
+        dataset.regressCovariates(cov_names=technical_labels, verbose=True)
+        logging.log('after regress: ' + dataset.summary)
+
+
+        dataset.runPCA(var_per_dim=10, verbose=True)
+        logging.log('after PCA: ' + dataset.summary)
+
+        logging.log('pickling')
         dataset.pickle(pickle_filename)
         return dataset
 
@@ -144,48 +160,165 @@ def LeaveOneOutReconstruction(dataset, max_iter=50, dimension=5, tissue_inertia=
 
     return sum_err, sum_var
 
+def EvaluateCovariates(dataset, train_ids, test_ids, max_iter=1000, dimension=6, tissue_inertia=5., patient_inertia=5., lam=5.):
+    logging.log('training model')
+    model = PatientModel(max_iter=max_iter, weight_inertia=tissue_inertia)
+    model.fit(dataset)
+
+    logging.addNode('loading covariate auxiliary data')
+    realdir = os.path.dirname(os.path.realpath(__file__))
+    logging.log('loading ignore 99')
+    ignore_fn = os.path.join(realdir, 'ignore99s.txt')
+    ignore_labels = []
+    for line in open(ignore_fn, 'r'):
+        if not line:
+            break
+        ignore_labels += [line]
+    logging.log('loading categoricals')
+    categoricals_fn = os.path.join(realdir, 'categoricals.txt')
+    categories = dict()
+    for line in open(categoricals_fn, 'r'):
+        if not line:
+            break
+        categories[line] = dict()
+    logging.closeNode()
+
+    logging.addNode('loading covariates')
+    stream = open(args.covariates, 'r')
+    labels = stream.readline().strip().split('\t')
+    covariates = dict()
+    for line in stream:
+        items = line.strip().split('\t')
+        patient_id = items[0]
+        for idx in range(1, len(items)):
+            val = items[idx]
+            label = labels[idx]
+            if label in categories:
+                if val not in categories[label]:
+                    categories[label][val] = []
+                categories[label][val] += [patient_id]
+                continue
+            try:
+                val = float(items[idx])
+                if label in ignore_labels and val > 90:
+                    continue
+                if label not in covariates:
+                    covariates[label] = dict()
+                covariates[label][patient_id] = val
+            except:
+                continue
+    logging.closeNode()
+
+
+    logging.addNode('learning covariates')
+    results = []
+    for label in covariates:
+        trainX_raw = []
+        trainY_raw = []
+        testX_raw = []
+        testY_raw = []
+
+        for patient_id in covariates[label]:
+            if patient_id in train_ids:
+                trainX_raw += [model.patient_reps[patient_id]]
+                trainY_raw += [covariates[label][patient_id]]
+            elif patient_id in test_ids:
+                testX_raw += [model.patient_reps[patient_id]]
+                testY_raw += [covariates[label][patient_id]]
+            else:
+                #logging.log('id %s not found' % patient_id)
+                pass
+
+        if not trainX_raw or not testX_raw:
+            logging.log('label "%s" had insufficient samples' % label)
+            continue
+                
+        trainX = np.concatenate(trainX_raw, axis=0)
+        trainY = np.array([trainY_raw]).T
+        testX = np.concatenate(testX_raw, axis=0)
+        testY = np.array([testY_raw]).T
+
+        ntrain, dim = trainX.shape
+
+        meanX, meanY = trainX.mean(), trainY.mean()
+        residX = trainX - meanX
+        residY = trainY - meanY
+
+        weights = np.linalg.inv(residX.T.dot(residX) + dim * lam * np.eye(dim)).dot(residX.T).dot(residY)
+
+        pred = meanY + (testX - meanX).dot(weights)
+
+        naive_err = (testY - trainY.mean()).T.dot(testY - trainY.mean())
+        trained_err = (testY - pred).T.dot(testY - pred)
+        var_exp = (naive_err - trained_err)/naive_err
+        logging.log('on "%s": naive=%f, trained=%f, var_exp=%f, #samples=%f,%f' % (label, naive_err, trained_err, var_exp, len(trainX_raw), len(testX_raw)))
+        results += [(var_exp, label)]
+    logging.closeNode()
+
+    results.sort()
+    logging.addNode('results')
+    for var_exp, label in results:
+        logging.log('%s\t: %f' % (label, var_exp))
+    logging.closeNode()
+
+
+def trainHyperParams(dataset, train_samples=None, lr=0.2, asym_epoch=1000, tissue_inertia=2., patient_inertia=2., lam=5., dim=6.):
+    logging.addNode('training hypers')
+
+    
+
+    logging.closeNode()
+
+
+
 
 if __name__ == '__main__':
+    if args.logfile:
+        logging.set_logfile(args.logfile)
+    else:
+        logging.set_logfile('log.out')
+
     logging.addNode('loading dataset')
     dataset = getDataset()
-    #dataset.addTechnicalsFromFile(args.technical)
-    #dataset.regressTechnicals()
     logging.closeNode()
-    # TODO specify logstream
 
-    logging.addNode('initilizing logfile')
-    logdir = 'results/'
-    if not os.path.exists(logdir):
-        os.makedirs(logdir)
-    logfile = os.path.join(logdir,'i%d-d%d-tin%d-pin%d.csv' % (args.max_iter, args.dimension, int(args.inertia), int(args.inertia)))
-    logstream = open(logfile, 'w')
-    logstream.write('scale,err,#patients,#tissues,patient_id,tissue_name\n')
-    logging.closeNode()
-    logging.addNode('running LOOR')
-    print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, 
-                                                                   tissue_inertia=args.inertia, patient_inertia=args.inertia,
-                                                                   logstream=logstream)
+
+    #train_samples, val_samples, test_samples = dataset.split()
+    patient_ids = dataset.patients.keys()
+    np.random.seed(args.split_seed)
+    patient_ids = np.random.permutation(patient_ids)
+    npatients = len(patient_ids)
+    ntrain = int(npatients * 0.6)
+    nvalid = int(npatients * (0.6 + 0.2))
+    train_ids, val_ids = patient_ids[:ntrain], patient_ids[ntrain:nvalid]
+
+
+
+    #logging.addNode('initilizing logfile')
+    #logdir = 'results/'
+    #if not os.path.exists(logdir):
+    #    os.makedirs(logdir)
+    #logfile = os.path.join(logdir,'i%d-d%d-tin%d-pin%d.csv' % (args.max_iter, args.dimension, int(args.inertia), int(args.inertia)))
+    #logstream = open(logfile, 'w')
+    #logstream.write('scale,err,#patients,#tissues,patient_id,tissue_name\n')
+    #logging.closeNode()
+    #logging.addNode('running LOOR')
+    #print "LOOR err: %f\nZERO err: %f" % LeaveOneOutReconstruction(dataset, max_iter=args.max_iter, dimension=args.dimension, 
+    #                                                               tissue_inertia=args.inertia, patient_inertia=args.inertia,
+    #                                                               logstream=logstream)
+    #logging.exit()
+
+    EvaluateCovariates(dataset, train_ids, val_ids, max_iter=100)
     logging.exit()
-
-    model = PatientModel(max_iter=100)
+    model = PatientModel(max_iter=1000)
     model.fit(dataset)
+    
 
     #tissue_name = dataset.tissues.keys()[0]
     #tissue = dataset.tissues[tissue_name]
 
     # print tissue.value[tissue.rows[patient_id],:]
     # print model.predict(patient_id, tissue_name)
-
-    total_var = 0.
-    remaining_var = 0.
-    for tissue_name in dataset.tissues:
-        tissue = dataset.tissues[tissue_name]
-        for patient_id in tissue.patient_ids:
-            rep = dataset.getValue(patient_id, tissue_name)
-            residual = model.predict(patient_id, tissue_name) - rep
-
-            total_var += rep.T.dot(rep)[0,0]
-            remaining_var += residual.T.dot(residual)[0,0]
 
     print 'total_var = {}'.format(total_var)
     print 'remaining_var = {}'.format(remaining_var)

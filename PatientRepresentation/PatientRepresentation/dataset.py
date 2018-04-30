@@ -11,9 +11,11 @@ import pickle
 import collapse_logging as logging
 
 import numpy as np
+import random
 
 from tissue import Tissue
 from patient import Patient
+import attribute_parser as parser
 
 
 class PatientTissueData(object):
@@ -56,46 +58,51 @@ class PatientTissueData(object):
     def pickle(self, filename):
         pickle.dump(self, open(filename, 'wb'))
 
-    def addTechnicalsFromFile(self, filename, regress=True):
+    def addTechnicalsFromFile(self, filename, regress=False, verbose=False):
         ''' stores data in Tissue object'''
-        f = open(filename)
-        labels = f.readline().strip().split()
+        labels = set()
 
-        for line in f:
-            items = line.strip().split()
+        for sample_id, label, val in parser.regressableSampleAttributes(filename):
+            patient_id, tissue_name = sample_id
+            tissue = self.tissues[tissue_name]
+            if patient_id not in tissue._technicals:
+                tissue._technicals[patient_id] = dict()
+            tissue._technicals[patient_id][label] = val
+            labels.add(label)
 
-            id = items[0]
-            id_components = id.split('-')
-            patient_id = '-'.join(id_components[:2])
-            tissue_name = items[10]
-            tissue = self._tissues[tissue_name]
-            
-            #if patient_id not in self._technicals:
-            #    self._technicals[patient_id] = dict()
+        if regress:
+            self.regressCovariates(cov_names=self._technical_labels, verbose=verbose)
 
-            #if tissue_name not in self._technicals[patient_id]:
-            #    self._technicals[(patient_id, tissue_name)] = dict()
+        return labels
 
-            for i in range(1, len(items)):
-                try:
-                    val = float(items[i])
-                    #technicals[(patient_id, tissue_name)][labels[i]] = val
-                    tissue._technicals[labels[i]][patient_id] = val
-                    if labels[i] not in self._technical_labels:
-                        self._technical_labels += [labels[i]]
-                except:
-                    pass
+    def addCovariatesFromFile(self, filename, verbose=False):
+        labels = set()
+        for patient_id, label, val, in parser.regressableSubjectAttributes(filename):
+            for tissue in self.tissues.values():
+                if patient_id not in tissue._technicals:
+                    tissue._technicals[patient_id] = dict()
+                tissue._technicals[patient_id][label] = val
+            labels.add(label)
 
-        for sample_id in self.samples:
-            self._technicals[sample_id] = np.array([technicals[sample_id][label]
-                                                    for label in self._technical_labels])
+        return labels
 
-    def runPCA(self, tissue_name=None):
+    def runPCA(self, tissue_name=None, var_per_dim=10., verbose=False):
         if tissue_name is None:
+            if verbose:
+                progress = logging.addNode('Running PCA', count=len(self._tissues))
             for tn in self._tissues:
-                self._tissues[tn].runPCA()
+                self._tissues[tn].runPCA(verbose=verbose)
+                if verbose:
+                    progress.step()
+
+            if verbose:
+                logging.closeNode()
         else:
-            self._tissues[tissue_name].runPCA()
+            self._tissues[tissue_name].runPCA(var_per_dim=var_per_dim)
+
+        for tissue_name in self.tissues:
+            for patient_id in self.tissues[tissue_name].patient_ids:
+                self.addValue(patient_id, tissue_name, self._tissues[tissue_name].getValue(patient_id))
 
     def regressCovariates(self, tissue_name=None, cov_names=None, verbose=True):
         ''' Remove linear trends of certain covariates.
@@ -104,24 +111,54 @@ class PatientTissueData(object):
         '''
         if tissue_name is None:
             if verbose:
-                progress = logging.logProgress('REGRESSING COVARIATES', len(self._tissues))
+                progress = logging.addNode('Regressing Covariates', count=len(self._tissues))
             for tn in self._tissues:
                 if verbose:
-                    statement = logging.log('regressing on tissue: ' + tn)
-                self._tissues[tn].regressCovariates(cov_names)
-                statement.delete()
-                progress.step()
-        else:
-            self._tissues[tissue_name].regressCovariates(cov_names)
+                    #statement = logging.log('regressing on tissue: ' + tn)
+                    pass
+                self._tissues[tn].regressCovariates(self._technicals)
+                if verbose:
+                    progress.step()
+            if verbose:
+                logging.closeNode()
 
-    def split(self, seed=None):
+        else:
+            self._tissues[tissue_name].regressCovariates(cov_names=cov_names)
+
+        for tn in self.tissues:
+            for patient_id in self.tissues[tn].patient_ids:
+                self.addValue(patient_id, tn, self._tissues[tn].getValue(patient_id))
+
+    def normalize(self, verbose=True):
+        if verbose:
+            progress = logging.addNode('Normalizing', count=len(self._tissues))
+        for tissue in self._tissues.values():
+            if verbose:
+                logging.log('normalizing ' + tissue.name)
+            tissue.normalize(verbose=verbose)
+            if verbose:
+                progress.step()
+        if verbose:
+            logging.closeNode()
+
+
+    def split(self, seed=None, train_frac=0.8, val_frac=0.):
         ''' Split dataset into train, validate, test.
         Args:
             seed: random seed
         Returns:
-            ?
+            training sample ids <(patient_id, tissue_name)>
+            test sample ids
         '''
-        pass
+        samples = []
+        for sample in self.samples:
+            samples += [sample]
+        np.random.seed(seed)
+        samples = np.random.permutation(samples)
+
+        ntrain = int(len(samples) * train_frac)
+        nvalid = int(len(samples) * (train_frac + val_frac))
+        return samples[:ntrain], samples[ntrain:nvalid], samples[nvalid:]
         
     @property
     def patients(self):
@@ -133,9 +170,11 @@ class PatientTissueData(object):
 
     @property 
     def samples(self):
+        ret = []
         for patient_id in self._patients:
-            for tissue_name in self._patients[patient_id].tissues:
-                yield (patient_id, tissue_name)
+            for tissue_name in self._patients[patient_id].tissue_names:
+                ret += [(patient_id, tissue_name)]
+        return ret
 
     @property
     def total_samples(self):
@@ -153,6 +192,31 @@ class PatientTissueData(object):
                 ans += rep.dot(rep.T)[0,0]
         return ans
 
+    @property
+    def dimension(self):
+        ans = 0
+        for tissue in self.tissues.values():
+            ans += tissue.dimension
+        return ans
+
+    @property
+    def sum_dimension(self):
+        ans = 0
+        for tissue in self.tissues.values():
+            ans += tissue.dimension * tissue.num_patients
+        return ans
+
+    @property
+    def summary(self):
+        ans = ''
+        ans += '#tissues: %d, ' % len(self.tissues)
+        ans += '#patients: %d, ' % len(self.patients)
+        ans += '#samples: %d, ' % self.total_samples
+        ans += 'dimension: %d, ' % self.dimension
+        ans += 'sum_dimension: %d, ' % self.sum_dimension
+        ans += 'variance: %f ' % self.total_variance
+        return ans
+
 def loadFromDir(directory_name, verbose=False):
     """ Loads a dataset from a folder of gene expression files.
     Args:
@@ -163,14 +227,19 @@ def loadFromDir(directory_name, verbose=False):
     dataset = PatientTissueData()
 
     filenames = os.listdir(directory_name)
-    load_progress = logging.logProgress('LOADING FILES', len(filenames))
+    #load_progress = logging.logProgress('LOADING FILES', len(filenames))
+    if verbose:
+        load_progress = logging.addNode('LOADING FILES', count=len(filenames))
     for filename in filenames:
         if verbose:
             logging.log('reading from ' + filename)
         loadFromFile(os.path.join(directory_name, filename), dataset, 
                                verbose=verbose)
         load_progress.step()
-    logging.closeNode()
+        #break
+
+    if verbose:
+        logging.closeNode()
 
     return dataset
     
